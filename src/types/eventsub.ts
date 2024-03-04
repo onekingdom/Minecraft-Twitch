@@ -27,3 +27,62 @@ export type ChatMessageEvent = {
   reply: null | any; // Type of reply can be defined further
   channel_points_custom_reward_id: null | any; // Type of channel_points_custom_reward_id can be defined further
 };
+
+
+
+
+
+
+export type EventSubNotification = {
+    Object: {
+      message_id: string;
+      message_type: string;
+      message_timestamp: string;
+      subscription_type: string;
+      subscription_version: string;
+    };
+    payload: {
+      subscription: {
+        id: string;
+        status: string;
+        type: string;
+        version: string;
+        cost: number;
+        condition: {
+          // The condition object structure depends on the specific subscription type
+          // For example, if subscribing to broadcaster's new follower, it might contain broadcaster's ID
+          [key: string]: any; // You might need to define a more specific type based on your subscription types
+        };
+        transport: {
+          method: string;
+          session_id: string;
+        };
+        created_at: string;
+      };
+      event: {
+        // The event object structure depends on the specific subscription type
+        // For example, if subscribing to broadcaster's new follower, it might contain follower's information
+        [key: string]: any; // You might need to define a more specific type based on your subscription types
+      };
+    };
+  };
+
+
+export type ChannelPointsCustomRewardRedemptionAddEvent = {
+    id: string;
+    broadcaster_user_id: string;
+    broadcaster_user_login: string;
+    broadcaster_user_name: string;
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    user_input: string;
+    status: string;
+    reward: {
+      id: string;
+      title: string;
+      cost: number;
+      prompt: string;
+    };
+    redeemed_at: string;
+  };

@@ -10,3 +10,11 @@ export type ChatMessage = {
 };
 
 export interface ChatMessageStorage extends Models.Document {}
+
+
+
+export interface Tokens extends Models.Document {
+  refreshToken: string;
+  channelID: number;
+  accessToken: string;
+}

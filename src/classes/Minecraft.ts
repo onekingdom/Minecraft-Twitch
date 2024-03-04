@@ -1,7 +1,9 @@
+import axios from "axios";
 import { pterodactylAPI } from "../axios/pterodactyl";
 import randomItems from "../data/MinecraftItems.json";
-
-const players = ["Jochemwite", "Mo_de_olie_sjeik"];
+import dotenv from "dotenv";
+import { PlayerData } from "../types/servertap";
+dotenv.config();
 
 type Enchantment = {
   name: string;
@@ -56,17 +58,33 @@ const enchantedBooks: EnchantedBook[] = [
   // Add more types as needed
 ];
 class minecraft {
+  async getPlayers() {
+    try {
+      const res = await axios.get<PlayerData[]>("http://157.90.198.150:25575/v1/players", {
+        headers: {
+          key: process.env.serverTap!,
+        },
+      });
+      return res.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async randomPlayer() {
+    const players = await this.getPlayers();
+
+    if (!players || players.length === 0) return console.log("No players online");
+
+    const randomPlayer = players[Math.floor(Math.random() * players.length)];
+    return randomPlayer.uuid;
+  }
+
   //kill all hostile mobs
   async killMods() {
     const data = await pterodactylAPI.post("/client/servers/947aab94/command", {
       command: `killall hostile`,
     });
-  }
-
-  randomPlayer() {
-    const randomPlayer = players[Math.floor(Math.random() * players.length)];
-
-    return randomPlayer;
   }
 
   async sendCommand(command: string) {
@@ -130,10 +148,16 @@ class minecraft {
     amount: number;
     randomPLayer: string;
   }> {
-    const players = ["Mo_de_olie_sjeik"];
     //get random player
-    const randomPlayer = players[Math.floor(Math.random() * players.length)];
+    const randomPlayer = await this.randomPlayer();
     const randomamount = Math.floor(Math.random() * amount) + 1;
+
+    if (!randomPlayer)
+      return {
+        amount: randomamount,
+        mob: mob,
+        randomPLayer: "No players online",
+      };
 
     const data = await pterodactylAPI.post("/client/servers/947aab94/command", {
       command: `spawnmob ${mob} ${randomamount} ${randomPlayer}`,
@@ -442,11 +466,11 @@ class minecraft {
 
     if (good) {
       this.randomBook(username);
-      return "Players Win"
+      return "Players Win";
     } else {
       await this.jumpscare_look_at_ender();
-      await this.torando()
-      return "chat wins"
+      await this.torando();
+      return "chat wins";
     }
   }
 }
