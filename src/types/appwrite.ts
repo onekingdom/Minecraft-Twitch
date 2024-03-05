@@ -18,3 +18,10 @@ export interface Tokens extends Models.Document {
   channelID: number;
   accessToken: string;
 }
+
+export interface channelPointsStorage extends Models.Document {
+  rewardID: string;
+  function: string;
+  category: string;
+  channelID: number;
+}

@@ -1,6 +1,6 @@
 import { ID, Query } from "node-appwrite";
 import { OneKingdomDatabase, database } from "../lib/appwrite";
-import { ChatMessage, Tokens } from "../types/appwrite";
+import { ChatMessage, Tokens, channelPointsStorage } from "../types/appwrite";
 
 class appwrite {
   databaseID: string;
@@ -15,6 +15,16 @@ class appwrite {
     await database.createDocument(this.databaseID, this.collectionID, ID.unique(), message);
   }
 
+  // create channel points reward
+  async createChannelPointsReward(reward: { rewardID: string; function: string; category: string, channelID: number}) {
+    try {
+      const res = await database.createDocument("65e363d2265b5ae24298", "65e363dbd731733903bd", ID.unique(), reward);
+      return res;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   //check for channel points reward
   async checkForChannelPointsReward(rewardId: string) {
     const rewards = await database.listDocuments<any>("65e363d2265b5ae24298", "65e363dbd731733903bd", [Query.equal("rewardID", rewardId)]);
@@ -25,6 +35,16 @@ class appwrite {
     3;
 
     return false;
+  }
+
+  //get all rewards ID based of category
+  async getRewardsBasedOfCategory(category: string, channelID: number) {
+    const res = await database.listDocuments<channelPointsStorage>("65e363d2265b5ae24298", "65e363dbd731733903bd", [
+      Query.equal("category", category),
+      Query.equal("channelID", channelID),
+      Query.limit(50),
+    ]);
+    return res.documents;
   }
 
   // get Tokens

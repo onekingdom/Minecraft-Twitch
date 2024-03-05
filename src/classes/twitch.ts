@@ -2,6 +2,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import dotenv from "dotenv";
 import { TwitchAPI } from "../axios/twitchAPI";
 import { appwriteAPI } from "./appwrite";
+import { CustomRewardRequest, CustomRewardResponse } from "../types/twitchAPI";
 dotenv.config();
 
 class twitch {
@@ -36,15 +37,15 @@ class twitch {
   }
 
   //subscribe to events
-  private async subscribeToEvents() {
+  async subscribeToEvents(channelID: number, event: string) {
     try {
       const res = await axios.post(
         "https://api.twitch.tv/helix/eventsub/subscriptions",
         {
-          type: "channel.chat.message",
+          type: event,
           version: "1",
           condition: {
-            broadcaster_user_id: "116728530",
+            broadcaster_user_id: channelID.toString(),
             user_id: "900954624",
           },
           transport: {
@@ -158,6 +159,55 @@ class twitch {
       console.log(error);
     }
   }
+
+  //create stream marker
+  async CreateStreamMarker(channelID: number, description: string) {
+    try {
+      const res = await TwitchAPI.post(
+        `/streams/markers`,
+        {
+          user_id: channelID,
+          description: description,
+        },
+        await this.Config(channelID)
+      );
+      return res.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async getChannelInfo(channelID: number) {
+    try {
+      const res = await TwitchAPI.get(`/channels?broadcaster_id=${channelID}`, await this.Config(channelID));
+      return res.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  //get channel followers
+  async getChannelFollowers(channelID: number) {
+    try {
+      const res = await TwitchAPI.get(`/channels/followers?broadcaster_id=${channelID}`, await this.Config(channelID));
+      return res.data;
+    } catch (error) {
+      console.log(error);
+    }
+  
+  }
+
+  //get channel points
+  async getChannelPoints(channelID: number) {
+    try {
+      const res = await TwitchAPI.get(`/channel_points/custom_rewards?broadcaster_id=${channelID}`, await this.Config(channelID));
+      return res.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
 }
 
 const twitchAPI = new twitch();
@@ -240,15 +290,11 @@ class channelPointsAPI extends twitch {
   }
 
   //create custom reward
-  async createCustomReward(channelID: number, title: string, cost: number) {
+  async createCustomReward(channelID: number, data: CustomRewardRequest) {
     try {
-      const res = await TwitchAPI.post(
-        `/channel_points/custom_rewards`,
-        {
-          broadcaster_id: channelID.toString(),
-          title: title,
-          cost: cost,
-        },
+      const res = await TwitchAPI.post<CustomRewardResponse>(
+        `/channel_points/custom_rewards?broadcaster_id=${channelID}`,
+        data,
         await this.Config(channelID)
       );
       return res.data;
@@ -286,11 +332,31 @@ class channelPointsAPI extends twitch {
     }
   }
 
+  //disable reward
+  async DisableReward(rewardID: string, channelID: number) {
+    try {
+      const res = await TwitchAPI.patch(
+        `/channel_points/custom_rewards?broadcaster_id=${channelID.toString()}&id=${rewardID}`,
+        {
+          id: rewardID,
+          is_enabled: false,
+        },
+        await this.Config(channelID)
+      );
+      return res.data;
+    } catch (error) {
+      console.log(error);
+    }
+
+
+    
+  }
+
+
   //get custom rewards
   async getCustomRewards(channelID: number) {
     try {
       const res = await TwitchAPI.get(`channel_points/custom_rewards?broadcaster_id=${channelID}`, await this.Config(channelID));
-
 
       return res.data;
     } catch (error) {

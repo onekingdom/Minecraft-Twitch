@@ -94,7 +94,7 @@ class minecraft {
   }
 
   //spawn random mob
-  async randomMob(): Promise<{
+  async randomMob(minecraftUUID: string): Promise<{
     mob: string;
     amount: number;
     randomPLayer: string;
@@ -130,7 +130,7 @@ class minecraft {
 
     const mob = mobs[Math.floor(Math.random() * mobs.length)];
 
-    const res = await this.spawnMob(mob, amount);
+    const res = await this.spawnMob(mob, amount, minecraftUUID);
 
     return {
       amount: res.amount,
@@ -142,7 +142,8 @@ class minecraft {
   //spawn mob
   async spawnMob(
     mob: string,
-    amount: number
+    amount: number,
+    minecraftUUID: string
   ): Promise<{
     mob: string;
     amount: number;
@@ -160,7 +161,7 @@ class minecraft {
       };
 
     const data = await pterodactylAPI.post("/client/servers/947aab94/command", {
-      command: `spawnmob ${mob} ${randomamount} ${randomPlayer}`,
+      command: `spawnmob ${mob} ${randomamount} ${minecraftUUID}`,
     });
 
     return {
@@ -354,13 +355,13 @@ class minecraft {
   }
 
   //get a random minecraft item
-  async randomItem(amount: number) {
+  async randomItem(amount: number, player: string) {
     const randomItem = randomItems[Math.floor(Math.random() * randomItems.length)];
     const randomAmount = Math.floor(Math.random() * amount) + 1;
     const randomPlayer = this.randomPlayer();
 
     const data = await pterodactylAPI.post("/client/servers/947aab94/command", {
-      command: `give ${randomPlayer} ${randomItem.name} ${randomAmount}`,
+      command: `give ${player} ${randomItem.name} ${randomAmount}`,
     });
 
     return {
@@ -384,11 +385,11 @@ class minecraft {
   }
 
   //spawns strong winds
-  async wind() {
+  async wind(player: string) {
     const randomPlayer = this.randomPlayer();
 
     const data = await pterodactylAPI.post("/client/servers/947aab94/command", {
-      command: `disasters start extremewinds 3 ${randomPlayer} `,
+      command: `disasters start extremewinds 3 ${player} `,
     });
 
     return randomPlayer;
@@ -428,21 +429,19 @@ class minecraft {
   }
 
   //spawn a supernova
-  async supernova() {
+  async supernova(level: string, player: string) {
     const randomPlayer = this.randomPlayer();
 
     const data = await pterodactylAPI.post("/client/servers/947aab94/command", {
-      command: `disasters start supernova 1 ${randomPlayer} `,
+      command: `disasters start supernova ${level} ${player} `,
     });
 
     return randomPlayer;
   }
 
-  async randomBook(lore: string) {
-    const randomPlayer = this.randomPlayer();
-    const randomBook = this.getRandomEnchantedBookTypes(3);
+  async randomBook(lore: string, player: string) {
 
-    const randomEnchantedBookTypes = this.getRandomEnchantedBookTypes(3);
+    const randomEnchantedBookTypes = await this.getRandomEnchantedBookTypes(3);
 
     // Format enchantments for the command
     const enchantmentStrings = randomEnchantedBookTypes.map((book) => {
@@ -454,18 +453,18 @@ class minecraft {
     console.log(lore);
 
     // Create the /give command string
-    const commandString = `give ${randomPlayer} enchanted_book 1 ${enchantmentStrings.join(" ")} lore:&1gifted_by_${lore}`;
+    const commandString = `give ${player} enchanted_book 1 ${enchantmentStrings.join(" ")} lore:&1gifted_by_${lore}`;
 
     this.sendCommand(commandString);
     return commandString;
   }
 
   //50/50
-  async fiftyFifty(username: string) {
-    const good = Math.random() < 0.5;
+  async fiftyFifty(player: string, giftedBy: string) {
+    const good = true
 
     if (good) {
-      this.randomBook(username);
+      await this.randomBook(giftedBy, player);
       return "Players Win";
     } else {
       await this.jumpscare_look_at_ender();
