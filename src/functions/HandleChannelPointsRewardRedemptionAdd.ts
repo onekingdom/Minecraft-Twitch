@@ -120,17 +120,12 @@ export async function HandleChannelPointsRewardRedemptionAdd(event: ChannelPoint
         break;
       case "minecraft:random_50_50":
         await minecraftAPI.fiftyFifty(player?.username as string, event.user_name);
-
         break;
       default:
         // Handle default case
         break;
     }
 
-    try {
-      await twitchAPI.CreateStreamMarker(+event.broadcaster_user_id, `Redeemed ${event.reward.title} by ${event.user_name}`);
-    } catch (error) {
-      console.log(error);
-    }
+
   }
 }

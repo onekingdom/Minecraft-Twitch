@@ -1,22 +1,6 @@
-// import "./eventsub/index";
-import dotenv from "dotenv";
-import twitchAPI, { ChannelPointsAPI } from "./classes/twitch";
+import { CustomRewardRequest } from "../types/twitchAPI";
 
-import { appwriteAPI } from "./classes/appwrite";
-import { CustomRewardRequest } from "./types/twitchAPI";
-dotenv.config();
-
-async function main() {
-  const x = await twitchAPI.subscribeToEvents(116728530, "channel.update");
-
-  console.log(x);
-}
-
-main();
-
-// create custom rewards for minecraft server
-
-const rewards: CustomRewardRequest[] = [
+export const rewards: CustomRewardRequest[] = [
   {
     title: "Spawn A Random Mob",
     cost: 500,
@@ -232,49 +216,3 @@ const rewards: CustomRewardRequest[] = [
     global_cooldown_seconds: 900,
   },
 ];
-
-async function createCustomReward(channelID: number) {
-  rewards.forEach(async (reward) => {
-    try {
-      const res = await ChannelPointsAPI.createCustomReward(channelID, reward);
-
-      if (res) {
-        const { id } = res.data[0];
-
-        await appwriteAPI.createChannelPointsReward({
-          category: "minecraft",
-          function: reward.function,
-          rewardID: id,
-          channelID: channelID,
-        });
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  });
-}
-
-async function DeleteAllRewards(channelID: number) {
-  // twitchAPI.RefreshToken("116728530");
-
-
-  const documents = await appwriteAPI.getRewardsBasedOfCategory("minecraft", channelID);
-
-  // console.log(documents);
-  
-  
-  documents.forEach(async (reward) => {
-    try {
-      const x = await ChannelPointsAPI.deleteCustomReward(channelID, reward.rewardID);
-      await appwriteAPI.deleteReward(reward.$id);
-      console.log(x);
-    } catch (error) {
-      console.log(error);
-    }
-  });
- 
-}
-
-// createCustomReward(122604941);
-
-// DeleteAllRewards(122604941);

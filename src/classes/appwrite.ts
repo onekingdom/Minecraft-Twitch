@@ -1,6 +1,6 @@
 import { ID, Query } from "node-appwrite";
 import { OneKingdomDatabase, database } from "../lib/appwrite";
-import { ChatMessage, Tokens, channelPointsStorage } from "../types/appwrite";
+import { ChatMessage, Tokens, channelPointsStorage, trackChannels } from "../types/appwrite";
 
 class appwrite {
   databaseID: string;
@@ -16,7 +16,7 @@ class appwrite {
   }
 
   // create channel points reward
-  async createChannelPointsReward(reward: { rewardID: string; function: string; category: string, channelID: number}) {
+  async createChannelPointsReward(reward: { rewardID: string; function: string; category: string; channelID: number }) {
     try {
       const res = await database.createDocument("65e363d2265b5ae24298", "65e363dbd731733903bd", ID.unique(), reward);
       return res;
@@ -47,11 +47,18 @@ class appwrite {
     return res.documents;
   }
 
+  //delete reward
+  async deleteReward(rewardID: string) {
+    const res = await database.deleteDocument("65e363d2265b5ae24298", "65e363dbd731733903bd", rewardID);
+    return res;
+  }
+
+
   // get Tokens
   async getTokens(channelID: number) {
     try {
       const Tokens = await OneKingdomDatabase.listDocuments<Tokens>("65afdd18a67ce0ea7b96", "65afdd31d1222a19ecfc", [
-        Query.equal("channelID", channelID),
+        Query.equal("channelID", +channelID),
       ]);
 
       if (Tokens.documents.length > 0) {
@@ -85,6 +92,34 @@ class appwrite {
       console.log("error updating tokens");
     }
   }
+
+  //async track channels
+  async UpdatetrackChannels(channelID: number, data: trackChannels) {
+    try {
+      const res = await OneKingdomDatabase.updateDocument<trackChannels>("65afdd18a67ce0ea7b96", "65ef32db5e0a80bbeb9b", channelID.toString(), data);
+      return res;
+    } catch (error: any) {
+      if (error.code === 404 && error.type === "document_not_found") {
+        console.log("Document not found creating new one");
+        const res = await OneKingdomDatabase.createDocument<trackChannels>("65afdd18a67ce0ea7b96", "65ef32db5e0a80bbeb9b", channelID.toString(), data);
+        return res;
+      }
+    }
+  }
+
+  // get track channels
+  async gettrackChannels(channelID: number) {
+    try {
+      const res = await OneKingdomDatabase.getDocument<trackChannels>("65afdd18a67ce0ea7b96", "65ef32db5e0a80bbeb9b", channelID.toString());
+      return res;
+    } catch (error: any) {
+      if (error.code === 404 && error.type === "document_not_found") {
+        return undefined;
+      }
+    }
+  }
+
+
 }
 
 export const appwriteAPI = new appwrite();

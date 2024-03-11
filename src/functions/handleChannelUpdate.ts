@@ -1,0 +1,85 @@
+import { appwriteAPI } from "../classes/appwrite";
+import twitchAPI, { ChannelPointsAPI } from "../classes/twitch";
+import { rewards } from "../lib/conts";
+import { ChannelUpdateEvent } from "../types/twitchAPI";
+
+export default async function handleChannelUpdate(event: ChannelUpdateEvent) {
+  console.log(`[${event.broadcaster_user_name}] updated their channel`);
+  console.log(event);
+
+  //get the previous channel data
+  const previousChannelData = await appwriteAPI.gettrackChannels(+event.broadcaster_user_id);
+
+  if (previousChannelData) {
+    //check if the category has changed
+    if (previousChannelData.categoryID !== event.category_id) {
+      if (previousChannelData.categoryID.toString() === "27471") {
+        //delete all rewards
+        await DeleteAllRewards(+event.broadcaster_user_id);
+        await twitchAPI.SendAnouncement(+event.broadcaster_user_id, "Minecraft ChannelPoints are now disabled!");
+        
+      }
+      
+      if (event.category_id.toString() === "27471") {
+        //create rewards
+        await createCustomReward(+event.broadcaster_user_id);
+        await twitchAPI.SendAnouncement(+event.broadcaster_user_id, "Minecraft ChannelPoints are now enabled!");
+      
+      }
+    }
+  }
+
+  const DBResponse = await appwriteAPI.UpdatetrackChannels(+event.broadcaster_user_id, {
+    categoryID: event.category_id,
+    title: event.title,
+    channelID: +event.broadcaster_user_id,
+    username: event.broadcaster_user_name,
+    categoryName: event.category_name,
+  } as any);
+
+  if (DBResponse) {
+    console.log("Channel updated");
+  }
+}
+
+async function DeleteAllRewards(channelID: number) {
+  // twitchAPI.RefreshToken("116728530");
+
+  const documents = await appwriteAPI.getRewardsBasedOfCategory("minecraft", channelID);
+
+  if (documents) {
+    documents.forEach(async (reward) => {
+      try {
+        const x = await ChannelPointsAPI.deleteCustomReward(channelID, reward.rewardID);
+        await appwriteAPI.deleteReward(reward.$id);
+        console.log(x);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+  }
+}
+
+
+async function createCustomReward(channelID: number) {
+  rewards.forEach(async (reward) => {
+    try {
+      const res = await ChannelPointsAPI.createCustomReward(channelID, reward);
+
+      if (res) {
+        const { id } = res.data[0];
+
+        await appwriteAPI.createChannelPointsReward({
+          category: "minecraft",
+          function: reward.function,
+          rewardID: id,
+          channelID: channelID,
+        });
+      }
+      //create little delay
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    } catch (error) {
+      console.log(error);
+    }
+  });
+}

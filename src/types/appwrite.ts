@@ -25,3 +25,15 @@ export interface channelPointsStorage extends Models.Document {
   category: string;
   channelID: number;
 }
+
+
+export interface trackChannels extends Models.Document {
+  channelID: number;
+  username: string;
+  title: string;
+  categoryName: string;
+  categoryID: string;
+
+
+
+}

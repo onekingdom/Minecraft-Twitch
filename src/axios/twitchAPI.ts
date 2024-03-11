@@ -13,8 +13,6 @@ const TwitchAPI = axios.create({
 TwitchAPI.interceptors.request.use(
   (request) => {
 
-    console.log(request.headers);
-
     return request;
   },
   (error: any) => {
@@ -39,7 +37,6 @@ TwitchAPI.interceptors.response.use(
       //get the channel from the request
       const channelID = error.response?.config.broadcasterID;
 
-      console.log("refreshing token" + channelID);
 
       const tokens = await appwriteAPI.getTokens(channelID);
       if (!tokens) {
@@ -48,7 +45,7 @@ TwitchAPI.interceptors.response.use(
       }
 
       //fetch the new accessToken and update the tokens
-      const newToken = await twitchAPI.RefreshToken(tokens.refreshToken);
+      const newToken = await twitchAPI.RefreshToken(tokens.refreshToken, channelID);
 
       //update the headers for the new request
       originalRequest.headers["Authorization"] = "Bearer " + newToken.access_token;

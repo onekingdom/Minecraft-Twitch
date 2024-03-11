@@ -2,17 +2,17 @@ import axios, { AxiosRequestConfig } from "axios";
 import dotenv from "dotenv";
 import { TwitchAPI } from "../axios/twitchAPI";
 import { appwriteAPI } from "./appwrite";
-import { CustomRewardRequest, CustomRewardResponse } from "../types/twitchAPI";
+import { CustomRewardRequest, CustomRewardResponse, EventSubTopics } from "../types/twitchAPI";
 dotenv.config();
 
 class twitch {
   //Assigning transports to conduits
-  private async createTransport(session_id: string) {
+  async createTransport(session_id: string) {
     try {
       const res = await axios.patch(
         "https://api.twitch.tv/helix/eventsub/conduits/shards",
         {
-          conduit_id: "b10ca1c5-cdaa-4e5f-b1dd-5740d6e306ac",
+          conduit_id: "69737826-a086-4f3f-b2e7-f78fe3ab126c",
           shards: [
             {
               id: "0",
@@ -37,7 +37,7 @@ class twitch {
   }
 
   //subscribe to events
-  async subscribeToEvents(channelID: number, event: string) {
+  async subscribeToEvents(channelID: number, event: EventSubTopics) {
     try {
       const res = await axios.post(
         "https://api.twitch.tv/helix/eventsub/subscriptions",
@@ -50,7 +50,7 @@ class twitch {
           },
           transport: {
             method: "conduit",
-            conduit_id: "b10ca1c5-cdaa-4e5f-b1dd-5740d6e306ac",
+            conduit_id: "69737826-a086-4f3f-b2e7-f78fe3ab126c",
           },
         },
         {
@@ -98,15 +98,13 @@ class twitch {
   }
 
   //refresh token
-  async RefreshToken(refreshToken: string) {
-    console.log("refreshing token");
-
+  async RefreshToken(refreshToken: string, channelID: number) {
     try {
       const res = await axios.post(
         `https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=refresh_token&refresh_token=${refreshToken}`
       );
 
-      await appwriteAPI.updateTokens(116728530, res.data);
+      await appwriteAPI.updateTokens(channelID, res.data);
 
       return res.data;
     } catch (error) {
@@ -117,17 +115,13 @@ class twitch {
   protected async Config(channelID: number) {
     const tokens = await appwriteAPI.getTokens(channelID);
 
-    //if tokens are found
-
-    console.log(channelID);
-
     if (tokens) {
       const config: AxiosRequestConfig = {
         headers: {
           "Client-ID": process.env.TWITCH_CLIENT_ID,
           Authorization: `Bearer ${tokens.accessToken}`,
         },
-        broadcasterID: channelID,
+        broadcasterID: +channelID,
       };
       return config;
     }
@@ -138,7 +132,7 @@ class twitch {
   //
 
   //send message to chat
-  async SendMessage(channelID: number, message: string) {
+  async SendMessage(channelID: number, message: string, reply_parent_message_id?: string) {
     try {
       const res = await TwitchAPI.post(
         `/chat/messages`,
@@ -146,6 +140,7 @@ class twitch {
           broadcaster_id: channelID.toString(),
           sender_id: "900954624",
           message: message,
+          reply_parent_message_id: reply_parent_message_id,
         },
         {
           headers: {
@@ -159,6 +154,70 @@ class twitch {
       console.log(error);
     }
   }
+
+  async SendAnouncement(channelID: number, message: string) {
+    try {
+      const res = await TwitchAPI.post(
+        `chat/announcements?broadcaster_id=${channelID}&moderator_id=900954624`,
+        { message: message, color: "orange" },
+        await this.Config(900954624)
+      );
+      return res.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  //update channel information
+  async UpdateChannelInfo(channelID: number, gameID?: string, title?: string) {
+
+    const game = gameID ? await this.SearchCategories(gameID) : undefined;
+    const game_id = game ? game.id : undefined;
+    try {
+      const res = await TwitchAPI.patch(
+        `/channels?broadcaster_id=${channelID}`,
+        {
+          title,
+          game_id,
+        },
+        await this.Config(channelID)
+      );
+      return game
+    } catch (error: any) {
+      console.log(error.response.data);
+    }
+  }
+
+  async SearchCategories(query: string){
+    try {
+      const res = await TwitchAPI.get(`/search/categories?query=${query}`, {
+        headers: {
+          "Client-ID": process.env.TWITCH_CLIENT_ID,
+          Authorization: `Bearer ${process.env.TWITCH_APP_TOKEN}`,
+        },
+      });
+      return res.data.data[0]
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
+  //make mod
+  async MakeMod(channelID: number, userID: string) {
+    try {
+      const res = await TwitchAPI.post(
+        `/moderation/moderators?broadcaster_id=${channelID}&user_id=${userID}`,
+        {},
+        await this.Config(channelID)
+      );
+      return res.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
 
   //create stream marker
   async CreateStreamMarker(channelID: number, description: string) {
@@ -194,7 +253,6 @@ class twitch {
     } catch (error) {
       console.log(error);
     }
-  
   }
 
   //get channel points
@@ -206,8 +264,6 @@ class twitch {
       console.log(error);
     }
   }
-
-
 }
 
 const twitchAPI = new twitch();
@@ -224,7 +280,7 @@ class consducts extends twitch {
           Authorization: `Bearer ${process.env.TWITCH_APP_TOKEN}`,
         },
       });
-      console.log(res.data);
+      return res.data;
     } catch (error) {
       console.log(error);
     }
@@ -347,11 +403,7 @@ class channelPointsAPI extends twitch {
     } catch (error) {
       console.log(error);
     }
-
-
-    
   }
-
 
   //get custom rewards
   async getCustomRewards(channelID: number) {
@@ -363,6 +415,8 @@ class channelPointsAPI extends twitch {
       console.log(error);
     }
   }
+
+  //create anouncement
 }
 
 export const ChannelPointsAPI = new channelPointsAPI();

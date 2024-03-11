@@ -461,7 +461,8 @@ class minecraft {
 
   //50/50
   async fiftyFifty(player: string, giftedBy: string) {
-    const good = true
+    //create a 50/50 chance
+    const good = Math.random() < 0.5;
 
     if (good) {
       await this.randomBook(giftedBy, player);
