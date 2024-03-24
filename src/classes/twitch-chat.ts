@@ -1,5 +1,18 @@
 import { TwitchAPI } from "../axios/twitchAPI";
-import { ChannelBadgeResponse, ChatSettingsResponse, getChanneleEmotes, getChattersRequest, getChattersResponse } from "../types/twitchAPI";
+import { TwitchAPP } from "../axios/twitchApp";
+import {
+  ChannelBadgeResponse,
+  ChatSettingsResponse,
+  SencChatAnnouncementRequest,
+  SendChatMessageRequest,
+  SendChatMessageResponse,
+  UpdateUserChatColorRequest,
+  getChanneleEmotes,
+  getChattersRequest,
+  getChattersResponse,
+  getUserChatColorResponse,
+  updateChatSettingsRequest,
+} from "../types/twitchAPI";
 
 class TwitchChat {
   //get all the chatters in a chat room
@@ -12,6 +25,7 @@ class TwitchChat {
           after,
           first,
         },
+        broadcasterID: +broadcaster_id,
       });
 
       return res.data;
@@ -28,6 +42,7 @@ class TwitchChat {
         params: {
           broadcaster_id,
         },
+        broadcasterID: +broadcaster_id,
       });
 
       return res.data;
@@ -38,9 +53,11 @@ class TwitchChat {
   }
 
   // get global Emotes
-  async getGlobalEmotes(): Promise<getChanneleEmotes> {
+  async getGlobalEmotes(broadcasterID: number): Promise<getChanneleEmotes> {
     try {
-      const res = await TwitchAPI.get<getChanneleEmotes>(`/chat/emotes/global`);
+      const res = await TwitchAPI.get<getChanneleEmotes>(`/chat/emotes/global`, {
+        broadcasterID: +broadcasterID,
+      });
 
       return res.data;
     } catch (error) {
@@ -50,12 +67,13 @@ class TwitchChat {
   }
 
   // Get Emote Sets
-  async getEmoteSets(emote_set_id: string): Promise<getChanneleEmotes> {
+  async getEmoteSets(broadcaster_id: string, emote_set_id: string): Promise<getChanneleEmotes> {
     try {
       const res = await TwitchAPI.get<getChanneleEmotes>(`/chat/emotes/set`, {
         params: {
           emote_set_id,
         },
+        broadcasterID: +broadcaster_id,
       });
 
       return res.data;
@@ -72,6 +90,7 @@ class TwitchChat {
         params: {
           broadcaster_id,
         },
+        broadcasterID: +broadcaster_id,
       });
 
       return res.data;
@@ -82,9 +101,11 @@ class TwitchChat {
   }
 
   // Get Global Chat Badges
-  async getGlobalChatBadges(): Promise<ChannelBadgeResponse> {
+  async getGlobalChatBadges(broadcasterID: string): Promise<ChannelBadgeResponse> {
     try {
-      const res = await TwitchAPI.get<ChannelBadgeResponse>(`/chat/badges/global`);
+      const res = await TwitchAPI.get<ChannelBadgeResponse>(`/chat/badges/global`, {
+        broadcasterID: +broadcasterID,
+      });
 
       return res.data;
     } catch (error) {
@@ -101,6 +122,7 @@ class TwitchChat {
           broadcaster_id,
           moderator_id,
         },
+        broadcasterID: +broadcaster_id,
       });
 
       return res.data;
@@ -119,6 +141,7 @@ class TwitchChat {
           broadcaster_id,
           after,
         },
+        broadcasterID: +user_id,
       });
 
       return res.data;
@@ -129,13 +152,14 @@ class TwitchChat {
   }
 
   // Update Chat Settings
-  async updateChatSettings(broadcaster_id: string, moderator_id: string, settings: ChatSettingsResponse): Promise<ChatSettingsResponse> {
+  async updateChatSettings(broadcaster_id: string, moderator_id: string, settings: updateChatSettingsRequest): Promise<ChatSettingsResponse> {
     try {
       const res = await TwitchAPI.patch<ChatSettingsResponse>(`/chat/settings`, settings, {
         params: {
           broadcaster_id,
           moderator_id,
         },
+        broadcasterID: +broadcaster_id,
       });
 
       return res.data;
@@ -146,11 +170,15 @@ class TwitchChat {
   }
 
   // Send Chat Announcement
-  async sendChatAnnouncement(broadcaster_id: string, message: string): Promise<void> {
+  async sendChatAnnouncement(broadcaster_id: string, moderator_id: string, announcement: SencChatAnnouncementRequest): Promise<void> {
     try {
-      await TwitchAPI.post(`/chat/announcements`, {
-        broadcaster_id,
-        message,
+      await TwitchAPI.post(`/chat/announcements`, announcement, {
+        params: {
+          broadcaster_id,
+          moderator_id,
+        },
+        // get the accessToken from the moderator
+        broadcasterID: +moderator_id,
       });
     } catch (error) {
       console.log(error);
@@ -158,4 +186,70 @@ class TwitchChat {
     }
   }
 
+  // send shoutout
+  async sendShoutout(from_broadcaster_id: string, to_broadcaster_id: string, moderator_id: string): Promise<void> {
+    try {
+      await TwitchAPI.post(`/chat/shoutouts`, null, {
+        params: {
+          from_broadcaster_id,
+          to_broadcaster_id,
+          moderator_id,
+        },
+        // get the accessToken from the moderator
+        broadcasterID: +moderator_id,
+      });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  // send Message
+  async sendMessage(message: SendChatMessageRequest): Promise<SendChatMessageResponse> {
+    try {
+      const res = await TwitchAPP.post(`/chat/messages`, message);
+      return res.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  // Get User Chat Color
+  async getUserChatColor(broadcaster_id: string, user_id: string[]): Promise<getUserChatColorResponse> {
+    try {
+      const res = await TwitchAPI.get<getUserChatColorResponse>(`/chat/color`, {
+        params: {
+          user_id,
+        },
+
+        broadcasterID: +broadcaster_id,
+      });
+
+      return res.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  // Update User Chat Color
+  async updateUserChatColor({ user_id, color }: UpdateUserChatColorRequest): Promise<void> {
+    try {
+      await TwitchAPI.put(`/chat/color`, null, {
+        params: {
+          user_id,
+          color,
+        },
+
+        broadcasterID: +user_id,       
+      });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 }
+
+
+export const twitchChat = new TwitchChat();

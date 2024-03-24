@@ -5,6 +5,8 @@ import { ChatMessageEvent, EventSubNotification } from "../types/eventsub";
 import { EventSubTopics } from "../types/twitchAPI";
 
 export async function HandleEvent(event: EventSubNotification) {
+
+
   switch (event.payload.subscription.type as EventSubTopics) {
     case "channel.chat.message":
       HandleChatMessage(event.payload.event as ChatMessageEvent);

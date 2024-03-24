@@ -1,14 +1,93 @@
 // import "./eventsub/index";
 import dotenv from "dotenv";
-import twitchAPI, { ChannelPointsAPI } from "./classes/twitch";
 
-import { appwriteAPI } from "./classes/appwrite";
 import { CustomRewardRequest } from "./types/twitchAPI";
+import { twitchChat } from "./classes/twitch-chat";
 import { EventsubAPI } from "./classes/twitch-eventsub";
+import { createWebSocket } from "./eventsub";
+import { EventSubNotification, WebSocketMessage } from "./types/eventsub";
+import { ChannelChatMessageCondition } from "./types/eventsubSubscribeConditions";
+import { HandleEvent } from "./eventsub/handleEvent";
 dotenv.config();
 
 async function main() {
-  
+  // check if we have a conduit
+
+  let conduct_id: string;
+
+  const checkconduct = await EventsubAPI.getConducts();
+  if (checkconduct.data.length === 0) {
+    const newConduct = await EventsubAPI.createConduct({ shard_count: 1 });
+    conduct_id = newConduct.data[0].id;
+  } else {
+    conduct_id = checkconduct.data[0].id;
+  }
+
+  let socket = createWebSocket(`wss://eventsub.wss.twitch.tv/ws`);
+
+  socket.on("message", (data) => {
+    const message = JSON.parse(data.toString());
+    handleWebSocketMessage(message, conduct_id);
+  });
+
+  const handleWebSocketMessage = async (message: WebSocketMessage, conduct_id: string) => {
+    switch (message.metadata.message_type) {
+      case "session_welcome":
+        // Handle welcome message
+        // set type to welcome
+
+        if ("session" in message.payload) {
+          //  handle condicts
+
+          const res = await EventsubAPI.updateConduitShards({
+            conduit_id: conduct_id,
+            shards: [
+              {
+                id: "0",
+                transport: {
+                  method: "websocket",
+                  session_id: message.payload.session.id,
+                },
+              },
+            ],
+          });
+
+          if (res.data[0].status === "enabled") {
+            console.log("Conduct is enabled");
+          }
+        }
+
+        break;
+      case "session_keepalive":
+        // Handle keepalive message
+        break;
+      case "notification":
+        // Handle notification message
+        HandleEvent(message as any);
+
+        break;
+      case "session_reconnect":
+        // Handle reconnect message
+        console.log("Received session reconnect message");
+
+        if ("session" in message.payload) {
+          // Reconnect to the WebSocket server
+          socket = createWebSocket(message.payload.session.reconnect_url);
+        }
+        break;
+      case "revocation":
+        // Handle revocation message
+        console.log("Received revocation message");
+        break;
+      default:
+        // Handle other message types or unknown types
+        console.log("Received unknown message type");
+
+        console.log(message.metadata.message_type);
+
+        break;
+    }
+  };
 }
 
 main();
@@ -231,8 +310,3 @@ const rewards: CustomRewardRequest[] = [
     global_cooldown_seconds: 900,
   },
 ];
-
-
-
-
-

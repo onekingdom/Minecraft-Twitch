@@ -103,7 +103,7 @@ class TwitchEventSub extends twitch {
     }
   }
   // create a new subscription
-  public async createEventSubSubscription({condition,transport, type, version}: CreateEventSubSubscriptionRequest): Promise<CreateEventSubSubscriptionResponse> {
+  public async createEventSubSubscription<T>({condition,transport, type, version}: CreateEventSubSubscriptionRequest<T>): Promise<CreateEventSubSubscriptionResponse> {
     try {
       const response = await TwitchAPP.post("/eventsub/subscriptions", {
         type,

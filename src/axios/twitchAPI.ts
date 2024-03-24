@@ -6,16 +6,20 @@ const TwitchAPI = axios.create({
   baseURL: "https://api.twitch.tv/helix",
   headers: {
     Accept: "application/json",
+    "Client-ID": process.env.TWITCH_CLIENT_ID,
   },
 });
 
-//twitch request interceptor
 TwitchAPI.interceptors.request.use(
-  (request) => {
-
-    return request;
+  async (config) => {
+    // Assuming you have a method to get the current token...
+    const tokens = await appwriteAPI.getTokens(config.broadcasterID!)
+    if (tokens) {
+      config.headers["Authorization"] = `Bearer ${tokens.accessToken}`;
+    }
+    return config;
   },
-  (error: any) => {
+  (error) => {
     return Promise.reject(error);
   }
 );
@@ -36,7 +40,6 @@ TwitchAPI.interceptors.response.use(
 
       //get the channel from the request
       const channelID = error.response?.config.broadcasterID;
-
 
       const tokens = await appwriteAPI.getTokens(channelID);
       if (!tokens) {

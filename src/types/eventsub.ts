@@ -1,3 +1,78 @@
+type Metadata = {
+  message_id: string;
+  message_type: string;
+  message_timestamp: string;
+};
+
+type Session = {
+  id: string;
+  status: string;
+  keepalive_timeout_seconds: number;
+  reconnect_url: string 
+  connected_at: string;
+};
+
+type WelcomeMessagePayload = {
+  session: Session;
+};
+
+type KeepaliveMessagePayload = {};
+
+type PingMessagePayload = {};
+
+type NotificationMessagePayload = {
+  subscription: {
+      id: string;
+      status: string;
+      type: string;
+      version: string;
+      cost: number;
+      condition: object; // Actual structure depends on subscription type
+      transport: {
+          method: string;
+          session_id: string;
+      };
+      created_at: string;
+  };
+  event: object; // Actual structure depends on subscription type
+};
+
+type ReconnectMessagePayload = {
+  session: Session;
+};
+
+type RevocationMessagePayload = {
+  subscription: {
+      id: string;
+      status: string;
+      type: string;
+      version: string;
+      cost: number;
+      condition: object; // Actual structure depends on subscription type
+      transport: {
+          method: string;
+          session_id: string;
+      };
+      created_at: string;
+  };
+};
+
+export type CloseMessagePayload = {
+  code: number;
+  reason: string;
+};
+
+export type WebSocketMessage =
+  | { metadata: Metadata; payload: WelcomeMessagePayload }
+  | { metadata: Metadata; payload: KeepaliveMessagePayload }
+  | { metadata: Metadata; payload: PingMessagePayload }
+  | { metadata: Metadata; payload: NotificationMessagePayload }
+  | { metadata: Metadata; payload: ReconnectMessagePayload }
+  | { metadata: Metadata; payload: RevocationMessagePayload }
+  | { metadata: Metadata; payload: CloseMessagePayload };
+
+
+
 export type ChatMessageEvent = {
   broadcaster_user_id: string;
   broadcaster_user_login: string;

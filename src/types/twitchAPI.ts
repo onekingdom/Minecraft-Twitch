@@ -184,19 +184,20 @@ type ShardStatus =
   | "websocket_network_timeout"
   | "websocket_network_error";
 
-type TransportMethod = "webhook" | "websocket";
+type TransportMethod = "webhook" | "websocket" | "conduit";
 
 interface Transport {
   method: TransportMethod;
   callback?: string;
   session_id?: string;
+  conduit_id?: string;
   connected_at?: string;
   disconnected_at?: string;
 }
 
 export interface GetEventSubSubscriptionsRequest {
   status?: SubscriptionStatus;
-  type?: EventSubTopics;
+  type: EventSubTopics;
   user_id?: string;
   after?: string;
 }
@@ -273,10 +274,10 @@ export interface UpdateShardResponse {
   data: SuccessfulShardUpdate[];
 }
 
-export interface CreateEventSubSubscriptionRequest {
-  type: string;
+export interface CreateEventSubSubscriptionRequest<T> {
+  type: EventSubTopics;
   version: string;
-  condition: object;
+  condition: T;
   transport: Transport;
 }
 
@@ -377,9 +378,7 @@ export interface ChatSettingsResponse {
   data: ChatSettings[];
 }
 
-
-
-interface updateChatSettingsRequest {
+export interface updateChatSettingsRequest {
   emote_mode?: boolean;
   follower_mode?: boolean;
   follower_mode_duration?: number;
@@ -389,4 +388,59 @@ interface updateChatSettingsRequest {
   slow_mode_wait_time?: number;
   subscriber_mode?: boolean;
   unique_chat_mode?: boolean;
+}
+
+type AnnouncementColor = "blue" | "green" | "orange" | "purple" | "primary";
+type UserChatColors =
+  | "blue"
+  | "blue_violet"
+  | "cadet_blue"
+  | "chocolate"
+  | "coral"
+  | "dodger_blue"
+  | "firebrick"
+  | "golden_rod"
+  | "green"
+  | "hot_pink"
+  | "orange_red"
+  | "red"
+  | "sea_green"
+  | "spring_green"
+  | "yellow_green";
+type HexColorCode = string; // Turbo and Prime users can use any Hex color code
+export interface SencChatAnnouncementRequest {
+  message: string;
+  color?: AnnouncementColor;
+}
+
+export interface SendChatMessageRequest {
+  broadcaster_id: string;
+  sender_id: string;
+  message: string;
+  reply_parent_message_id?: string;
+}
+
+export interface SendChatMessageResponse {
+  data: {
+    message_id: string;
+    is_sent: boolean;
+    drop_reason?: {
+      code: string;
+      message: string;
+    };
+  };
+}
+
+export interface getUserChatColorResponse {
+  data: {
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    color: string;
+  }[];
+}
+
+export interface UpdateUserChatColorRequest {
+  user_id: string;
+  color: UserChatColors | HexColorCode;
 }
