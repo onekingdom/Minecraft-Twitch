@@ -15,6 +15,12 @@ import {
 } from "../types/twitchAPI";
 
 class TwitchChat {
+  bot_id: number;
+
+  constructor() {
+    this.bot_id = +process.env.TWITCH_BOT_ID!;
+  }
+
   //get all the chatters in a chat room
   async getChatters({ broadcaster_id, moderator_id, after, first }: getChattersRequest): Promise<getChattersResponse> {
     try {
@@ -170,15 +176,15 @@ class TwitchChat {
   }
 
   // Send Chat Announcement
-  async sendChatAnnouncement(broadcaster_id: string, moderator_id: string, announcement: SencChatAnnouncementRequest): Promise<void> {
+  async sendChatAnnouncement(broadcaster_id: string, announcement: SencChatAnnouncementRequest): Promise<void> {
     try {
       await TwitchAPI.post(`/chat/announcements`, announcement, {
         params: {
           broadcaster_id,
-          moderator_id,
+          moderator_id: this.bot_id,
         },
         // get the accessToken from the moderator
-        broadcasterID: +moderator_id,
+        broadcasterID: this.bot_id,
       });
     } catch (error) {
       console.log(error);
@@ -207,7 +213,10 @@ class TwitchChat {
   // send Message
   async sendMessage(message: SendChatMessageRequest): Promise<SendChatMessageResponse> {
     try {
-      const res = await TwitchAPP.post(`/chat/messages`, message);
+      const res = await TwitchAPP.post(`/chat/messages`, {
+        ...message,
+        sender_id: this.bot_id,
+      });
       return res.data;
     } catch (error) {
       console.log(error);
@@ -222,7 +231,6 @@ class TwitchChat {
         params: {
           user_id,
         },
-
         broadcasterID: +broadcaster_id,
       });
 
@@ -242,7 +250,7 @@ class TwitchChat {
           color,
         },
 
-        broadcasterID: +user_id,       
+        broadcasterID: +user_id,
       });
     } catch (error) {
       console.log(error);
@@ -250,6 +258,5 @@ class TwitchChat {
     }
   }
 }
-
 
 export const twitchChat = new TwitchChat();

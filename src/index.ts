@@ -6,7 +6,7 @@ import { twitchChat } from "./classes/twitch-chat";
 import { EventsubAPI } from "./classes/twitch-eventsub";
 import { createWebSocket } from "./eventsub";
 import { EventSubNotification, WebSocketMessage } from "./types/eventsub";
-import { ChannelChatMessageCondition } from "./types/eventsubSubscribeConditions";
+import { ChannelChatMessageCondition, ChannelPointsCustomRewardRedemptionAddCondition, ChannelUpdateCondition } from "./types/eventsubSubscribeConditions";
 import { HandleEvent } from "./eventsub/handleEvent";
 dotenv.config();
 
@@ -53,7 +53,20 @@ async function main() {
           });
 
           if (res.data[0].status === "enabled") {
-            console.log("Conduct is enabled");
+            // const res = await  EventsubAPI.createEventSubSubscription<ChannelUpdateCondition>({
+            //   type: "channel.update",
+            //   version: "1",
+            //   condition: {
+            //     broadcaster_user_id: "122604941",
+            //   },
+            //   transport: {
+            //     method: "conduit",
+            //     conduit_id: conduct_id,
+
+            //   },
+              
+            // })
+            
           }
         }
 

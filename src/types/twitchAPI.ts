@@ -415,7 +415,7 @@ export interface SencChatAnnouncementRequest {
 
 export interface SendChatMessageRequest {
   broadcaster_id: string;
-  sender_id: string;
+  // sender_id: string;
   message: string;
   reply_parent_message_id?: string;
 }
@@ -443,4 +443,48 @@ export interface getUserChatColorResponse {
 export interface UpdateUserChatColorRequest {
   user_id: string;
   color: UserChatColors | HexColorCode;
+}
+
+
+export interface GetModeratorsResponse {
+  data: chatUser[];
+  pagination: Pagination;
+}
+
+
+enum Label {
+  DrugsIntoxication = "DrugsIntoxication",
+  SexualThemes = "SexualThemes",
+  ViolentGraphic = "ViolentGraphic",
+  Gambling = "Gambling",
+  ProfanityVulgarity = "ProfanityVulgarity",
+}
+
+// Interface for Content Classification Labels (CCLs)
+interface ContentClassificationLabel {
+  id: Label;
+  is_enabled: boolean;
+}
+
+
+export interface ModifyChannelInformationRequest {
+  game_id?: string; // Optional, with specific behavior described for "0" or ""
+  broadcaster_language?: string; // Optional, with constraints on the values
+  title?: string; // Cannot be an empty string
+  delay?: number; // Optional, with additional constraints for Partner status
+  tags?: string[]; // Optional, with constraints on the number of tags, their length, and character content
+  content_classification_labels?: ContentClassificationLabel[]; // Optional, list of labels for content classification
+  is_branded_content?: boolean; // Optional, indicates if the channel has branded content
+}
+
+
+interface GameOrCategory {
+  box_art_url: string; // URL to an image of the game’s box art or streaming category
+  name: string; // The name of the game or category
+  id: string; // An ID that uniquely identifies the game or category
+}
+
+// Interface for the search categories response structure
+export interface SearchCategoriesResponse {
+  data: GameOrCategory[]; // The list of games or categories that match the query
 }

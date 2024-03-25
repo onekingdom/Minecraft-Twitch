@@ -1,6 +1,7 @@
 import { minecraftAPI } from "../classes/Minecraft";
 import { appwriteAPI } from "../classes/appwrite";
 import twitchAPI from "../classes/twitch";
+import { twitchChat } from "../classes/twitch-chat";
 import { ChannelPointsCustomRewardRedemptionAddEvent } from "../types/eventsub";
 
 export async function HandleChannelPointsRewardRedemptionAdd(event: ChannelPointsCustomRewardRedemptionAddEvent) {
@@ -35,34 +36,72 @@ export async function HandleChannelPointsRewardRedemptionAdd(event: ChannelPoint
   if (DBResponse) {
     switch (DBResponse[0].function as string) {
       case "minecraft:spawn_random":
-        await minecraftAPI.randomMob(player?.UUID as string);
-        break;
+        const res = await minecraftAPI.randomMob(player?.UUID as string);
+
+        await twitchChat.sendMessage({
+          broadcaster_id: event.broadcaster_user_id,
+          message: `@${event.user_name} spawned ${res.amount} ${res.mob}!`,
+        });
+
+        break
       case "minecraft:spawn_dolphin":
-        await minecraftAPI.spawnMob("dolphin", random, player?.UUID as string);
+        const dolphin = await minecraftAPI.spawnMob("dolphin", random, player?.UUID as string);
+        await twitchChat.sendMessage({
+          broadcaster_id: event.broadcaster_user_id,
+          message: `@${event.user_name} spawned ${dolphin.amount} dolphins!`,
+        });
         break;
       case "minecraft:spawn_cow":
-        await minecraftAPI.spawnMob("cow", random, player?.UUID as string);
+        const cow = await minecraftAPI.spawnMob("cow", random, player?.UUID as string);
+        await twitchChat.sendMessage({
+          broadcaster_id: event.broadcaster_user_id,
+          message: `@${event.user_name} spawned ${cow.amount} cows!`,
+        });
         break;
       case "minecraft:spawn_bee":
-        await minecraftAPI.spawnMob("bee", random, player?.UUID as string);
+        const bee = await minecraftAPI.spawnMob("bee", random, player?.UUID as string);
+        await twitchChat.sendMessage({
+          broadcaster_id: event.broadcaster_user_id,
+          message: `@${event.user_name} spawned ${bee.amount} bees!`,
+        });
         break;
       case "minecraft:spawn_chicken":
-        await minecraftAPI.spawnMob("chicken", random, player?.UUID as string);
+        const chicken = await minecraftAPI.spawnMob("chicken", random, player?.UUID as string);
+        await twitchChat.sendMessage({
+          broadcaster_id: event.broadcaster_user_id,
+          message: `@${event.user_name} spawned ${chicken.amount} chickens!`,
+        });
         break;
       case "minecraft:spawn_zombie":
-        await minecraftAPI.spawnMob("zombie", random, player?.UUID as string);
+        const zombie = await minecraftAPI.spawnMob("zombie", random, player?.UUID as string);
+        await twitchChat.sendMessage({
+          broadcaster_id: event.broadcaster_user_id,
+          message: `@${event.user_name} spawned ${zombie.amount} zombies!`,
+        });
         break;
       case "minecraft:spawn_skeleton":
-        await minecraftAPI.spawnMob("skeleton", random, player?.UUID as string);
+        const skeleton = await minecraftAPI.spawnMob("skeleton", random, player?.UUID as string);
+        await twitchChat.sendMessage({
+          broadcaster_id: event.broadcaster_user_id,
+          message: `@${event.user_name} spawned ${skeleton.amount} skeletons!`,
+        });
         break;
       case "minecraft:spawn_creeper":
-        await minecraftAPI.spawnMob("creeper", random, player?.UUID as string);
+        const creeper = await minecraftAPI.spawnMob("creeper", random, player?.UUID as string);
+        await twitchChat.sendMessage({
+          broadcaster_id: event.broadcaster_user_id,
+          message: `@${event.user_name} spawned ${creeper.amount} creepers!`,
+        });
         break;
       case "minecraft:spawn_vindicator":
-        await minecraftAPI.spawnMob("vindicator", random, player?.UUID as string);
+        const vindicator = await minecraftAPI.spawnMob("vindicator", random, player?.UUID as string);
+        await twitchChat.sendMessage({
+          broadcaster_id: event.broadcaster_user_id,
+          message: `@${event.user_name} spawned ${vindicator.amount} vindicators!`,
+        });
         break;
       case "jumpscare_crazy":
-        await minecraftAPI.jumpscare_crazy_guy();
+       const jumpscare_crazy = await minecraftAPI.jumpscare_crazy_guy();
         break;
       case "jumpscare_turn":
         await minecraftAPI.jumpscare_dont_turn_around();
@@ -119,13 +158,25 @@ export async function HandleChannelPointsRewardRedemptionAdd(event: ChannelPoint
         await minecraftAPI.killPlayer();
         break;
       case "minecraft:random_50_50":
-        await minecraftAPI.fiftyFifty(player?.username as string, event.user_name);
+        const random_book = await minecraftAPI.fiftyFifty(player?.username as string, event.user_name);
+
+        if(random_book.good) {
+          await twitchChat.sendMessage({
+            broadcaster_id: event.broadcaster_user_id,
+            message: `@${event.user_name} gifted a book with ${random_book.message}!`,
+          });
+          return
+        }
+
+        await twitchChat.sendMessage({
+          broadcaster_id: event.broadcaster_user_id,
+          message: `Ja hallo, waarom gun je ons geen boekie ${event.user_name}`,
+        });
+
         break;
       default:
         // Handle default case
         break;
     }
-
-
   }
 }

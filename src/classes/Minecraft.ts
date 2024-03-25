@@ -3,6 +3,7 @@ import { pterodactylAPI } from "../axios/pterodactyl";
 import randomItems from "../data/MinecraftItems.json";
 import dotenv from "dotenv";
 import { PlayerData } from "../types/servertap";
+import { twitchChat } from "./twitch-chat";
 dotenv.config();
 
 type Enchantment = {
@@ -440,8 +441,7 @@ class minecraft {
   }
 
   async randomBook(lore: string, player: string) {
-
-    const randomEnchantedBookTypes = await this.getRandomEnchantedBookTypes(3);
+    const randomEnchantedBookTypes = this.getRandomEnchantedBookTypes(3);
 
     // Format enchantments for the command
     const enchantmentStrings = randomEnchantedBookTypes.map((book) => {
@@ -450,27 +450,50 @@ class minecraft {
       return `${enchantmentName}:${enchantmentLevel}`;
     });
 
-    console.log(lore);
-
     // Create the /give command string
     const commandString = `give ${player} enchanted_book 1 ${enchantmentStrings.join(" ")} lore:&1gifted_by_${lore}`;
 
     this.sendCommand(commandString);
-    return commandString;
+    return enchantmentStrings;
   }
 
   //50/50
   async fiftyFifty(player: string, giftedBy: string) {
     //create a 50/50 chance
     const good = Math.random() < 0.5;
+    // const good = true;
 
     if (good) {
-      await this.randomBook(giftedBy, player);
-      return "Players Win";
+      const res = await this.randomBook(giftedBy, player);
+      const parseArray = res.map((item) => {
+        const [name, level] = item.split(":");
+        return {
+          name,
+          level,
+        };
+      });
+
+      let resultString = "";
+
+      parseArray.forEach((enchantment, index) => {
+        resultString += `${enchantment.name} ${enchantment.level}`;
+        if (index < parseArray.length - 1) {
+          resultString += ", ";
+        }
+      });
+
+      return {
+        player: player,
+        message: resultString,
+        good: true,
+      };
     } else {
       await this.jumpscare_look_at_ender();
-      await this.torando();
-      return "chat wins";
+      return {
+        player: player,
+        message: 'scared you!',
+        good: false,
+      };
     }
   }
 }

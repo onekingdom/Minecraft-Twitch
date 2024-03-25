@@ -5,6 +5,7 @@ declare namespace NodeJS {
     TWITCH_CLIENT_ID: string;
     TWITCH_CLIENT_SECRET: string;
     TWITCH_APP_TOKEN: string;
+    TWITCH_BOT_ID: string;
 
     // appwrite
     APPWRITE_ENDPOINT: string;

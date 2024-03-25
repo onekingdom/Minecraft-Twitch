@@ -10,11 +10,9 @@ class channelPointsAPI extends twitch {
   //create custom reward
   async createCustomReward(channelID: number, data: CustomRewardRequest) {
     try {
-      const res = await TwitchAPI.post<CustomRewardResponse>(
-        `/channel_points/custom_rewards?broadcaster_id=${channelID}`,
-        data,
-        await this.Config(channelID)
-      );
+      const res = await TwitchAPI.post<CustomRewardResponse>(`/channel_points/custom_rewards?broadcaster_id=${channelID}`, data, {
+        broadcasterID: channelID,
+      });
       return res.data;
     } catch (error) {
       console.log(error);
@@ -24,7 +22,9 @@ class channelPointsAPI extends twitch {
   //delete custom reward
   async deleteCustomReward(channelID: number, rewardID: string) {
     try {
-      const res = await TwitchAPI.delete(`/channel_points/custom_rewards?broadcaster_id=${channelID}&id=${rewardID}`, await this.Config(channelID));
+      const res = await TwitchAPI.delete(`/channel_points/custom_rewards?broadcaster_id=${channelID}&id=${rewardID}`, {
+        broadcasterID: channelID,
+      });
       return res.data;
     } catch (error) {
       console.log(error);
@@ -42,7 +42,9 @@ class channelPointsAPI extends twitch {
           title: title,
           cost: cost,
         },
-        await this.Config(channelID)
+        {
+          broadcasterID: channelID,
+        }
       );
       return res.data;
     } catch (error) {
@@ -59,7 +61,9 @@ class channelPointsAPI extends twitch {
           id: rewardID,
           is_enabled: false,
         },
-        await this.Config(channelID)
+       {
+        broadcasterID: channelID,
+       }
       );
       return res.data;
     } catch (error) {
@@ -70,7 +74,9 @@ class channelPointsAPI extends twitch {
   //get custom rewards
   async getCustomRewards(channelID: number) {
     try {
-      const res = await TwitchAPI.get(`channel_points/custom_rewards?broadcaster_id=${channelID}`, await this.Config(channelID));
+      const res = await TwitchAPI.get(`channel_points/custom_rewards?broadcaster_id=${channelID}`,{
+        broadcasterID: channelID,
+      });
 
       return res.data;
     } catch (error) {

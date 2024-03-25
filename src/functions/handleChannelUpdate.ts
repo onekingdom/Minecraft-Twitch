@@ -1,11 +1,11 @@
 import { appwriteAPI } from "../classes/appwrite";
-import twitchAPI, { ChannelPointsAPI } from "../classes/twitch";
+import { ChannelPointsAPI } from "../classes/twitch-channelpoints";
+import { twitchChat } from "../classes/twitch-chat";
 import { rewards } from "../lib/conts";
 import { ChannelUpdateEvent } from "../types/twitchAPI";
 
 export default async function handleChannelUpdate(event: ChannelUpdateEvent) {
   console.log(`[${event.broadcaster_user_name}] updated their channel`);
-  console.log(event);
 
   //get the previous channel data
   const previousChannelData = await appwriteAPI.gettrackChannels(+event.broadcaster_user_id);
@@ -16,15 +16,19 @@ export default async function handleChannelUpdate(event: ChannelUpdateEvent) {
       if (previousChannelData.categoryID.toString() === "27471") {
         //delete all rewards
         await DeleteAllRewards(+event.broadcaster_user_id);
-        await twitchAPI.SendAnouncement(+event.broadcaster_user_id, "Minecraft ChannelPoints are now disabled!");
-        
+        await twitchChat.sendChatAnnouncement(event.broadcaster_user_id, {
+          message: "Minecraft ChannelPoints are now disabled!",
+          color: "primary",
+        });
       }
-      
+
       if (event.category_id.toString() === "27471") {
         //create rewards
         await createCustomReward(+event.broadcaster_user_id);
-        await twitchAPI.SendAnouncement(+event.broadcaster_user_id, "Minecraft ChannelPoints are now enabled!");
-      
+        await twitchChat.sendChatAnnouncement(event.broadcaster_user_id, {
+          message: "Minecraft ChannelPoints are now enabled!",
+          color: "primary",
+        });
       }
     }
   }
@@ -59,7 +63,6 @@ async function DeleteAllRewards(channelID: number) {
     });
   }
 }
-
 
 async function createCustomReward(channelID: number) {
   rewards.forEach(async (reward) => {

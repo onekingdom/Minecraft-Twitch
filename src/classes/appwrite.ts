@@ -74,7 +74,6 @@ class appwrite {
 
   //update tokens
   async updateTokens(channelID: number, tokens: any) {
-    console.log(tokens);
 
     const user = await OneKingdomDatabase.listDocuments<Tokens>("65afdd18a67ce0ea7b96", "65afdd31d1222a19ecfc", [
       Query.equal("channelID", channelID),
