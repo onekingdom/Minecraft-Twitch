@@ -445,12 +445,10 @@ export interface UpdateUserChatColorRequest {
   color: UserChatColors | HexColorCode;
 }
 
-
 export interface GetModeratorsResponse {
   data: chatUser[];
   pagination: Pagination;
 }
-
 
 enum Label {
   DrugsIntoxication = "DrugsIntoxication",
@@ -466,7 +464,6 @@ interface ContentClassificationLabel {
   is_enabled: boolean;
 }
 
-
 export interface ModifyChannelInformationRequest {
   game_id?: string; // Optional, with specific behavior described for "0" or ""
   broadcaster_language?: string; // Optional, with constraints on the values
@@ -477,7 +474,6 @@ export interface ModifyChannelInformationRequest {
   is_branded_content?: boolean; // Optional, indicates if the channel has branded content
 }
 
-
 interface GameOrCategory {
   box_art_url: string; // URL to an image of the game’s box art or streaming category
   name: string; // The name of the game or category
@@ -487,4 +483,30 @@ interface GameOrCategory {
 // Interface for the search categories response structure
 export interface SearchCategoriesResponse {
   data: GameOrCategory[]; // The list of games or categories that match the query
+}
+
+export interface getChannelSubscriptionsReponse {
+  data: Array<{
+    broadcaster_id: string; // An ID that identifies the broadcaster.
+    broadcaster_login: string; // The broadcaster’s login name.
+    broadcaster_name: string; // The broadcaster’s display name.
+    gifter_id: string; // The ID of the user that gifted the subscription to the user. Is an empty string if is_gift is false.
+    gifter_login: string; // The gifter’s login name. Is an empty string if is_gift is false.
+    gifter_name: string; // The gifter’s display name. Is an empty string if is_gift is false.
+    is_gift: boolean; // A Boolean value that determines whether the subscription is a gift subscription. Is true if the subscription was gifted.
+    plan_name: string; // The name of the subscription.
+    tier: "1000" | "2000" | "3000"; // The type of subscription. Possible values are 1000 — Tier 1, 2000 — Tier 2, 3000 — Tier 3.
+    user_id: string; // An ID that identifies the subscribing user.
+    user_name: string; // The user’s display name.
+    user_login: string; // The user’s login name.
+  }>;
+
+  // Contains the information used to page through the list of results. The object is empty if there are no more pages left to page through.
+  pagination: {
+    cursor: string; // The cursor used to get the next or previous page of results. Use the cursor to set the request’s after or before query parameter depending on whether you’re paging forwards or backwards.
+  };
+
+  points: number; // The current number of subscriber points earned by this broadcaster. Points are based on the subscription tier of each user that subscribes to this broadcaster. For example, a Tier 1 subscription is worth 1 point, Tier 2 is worth 2 points, and Tier 3 is worth 6 points. The number of points determines the number of emote slots that are unlocked for the broadcaster.
+
+  total: number; // The total number of users that subscribe to this broadcaster.
 }

@@ -1,5 +1,5 @@
 import { TwitchAPI } from "../axios/twitchAPI";
-import { ModifyChannelInformationRequest } from "../types/twitchAPI";
+import { ModifyChannelInformationRequest, getChannelSubscriptionsReponse } from "../types/twitchAPI";
 import { twitch } from "./twitch";
 
 class twitchChannel extends twitch {
@@ -22,6 +22,27 @@ class twitchChannel extends twitch {
       throw error;
     }
   }
+
+  // get channel subscribers
+  async getSubsribers(broadcaster_id: string, first?: string, after?: string) {
+    try {
+      const res = await TwitchAPI.get<getChannelSubscriptionsReponse>(`/subscriptions`, {
+        params: {
+          broadcaster_id,
+          first,
+          after,
+        },
+        broadcasterID: +broadcaster_id,
+      });
+      return res.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+
+  
 }
 
 export const TwitchChannel = new twitchChannel();

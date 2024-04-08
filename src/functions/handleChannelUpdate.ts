@@ -1,4 +1,5 @@
-import { appwriteAPI } from "../classes/appwrite";
+import { ChannelPointsDatabase } from "../classes/database-channelpoints";
+import { TwitchDatabase } from "../classes/database-twitch";
 import { ChannelPointsAPI } from "../classes/twitch-channelpoints";
 import { twitchChat } from "../classes/twitch-chat";
 import { rewards } from "../lib/conts";
@@ -8,7 +9,7 @@ export default async function handleChannelUpdate(event: ChannelUpdateEvent) {
   console.log(`[${event.broadcaster_user_name}] updated their channel`);
 
   //get the previous channel data
-  const previousChannelData = await appwriteAPI.gettrackChannels(+event.broadcaster_user_id);
+  const previousChannelData = await TwitchDatabase.gettrackChannels(+event.broadcaster_user_id);
 
   if (previousChannelData) {
     //check if the category has changed
@@ -33,7 +34,7 @@ export default async function handleChannelUpdate(event: ChannelUpdateEvent) {
     }
   }
 
-  const DBResponse = await appwriteAPI.UpdatetrackChannels(+event.broadcaster_user_id, {
+  const DBResponse = await TwitchDatabase.UpdatetrackChannels(+event.broadcaster_user_id, {
     categoryID: event.category_id,
     title: event.title,
     channelID: +event.broadcaster_user_id,
@@ -49,13 +50,13 @@ export default async function handleChannelUpdate(event: ChannelUpdateEvent) {
 async function DeleteAllRewards(channelID: number) {
   // twitchAPI.RefreshToken("116728530");
 
-  const documents = await appwriteAPI.getRewardsBasedOfCategory("minecraft", channelID);
+  const documents = await ChannelPointsDatabase.getRewardsBasedOfCategory("minecraft", channelID);
 
   if (documents) {
     documents.forEach(async (reward) => {
       try {
         const x = await ChannelPointsAPI.deleteCustomReward(channelID, reward.rewardID);
-        await appwriteAPI.deleteReward(reward.$id);
+        await ChannelPointsDatabase.deleteReward(reward.$id);
         console.log(x);
       } catch (error) {
         console.log(error);
@@ -72,7 +73,7 @@ async function createCustomReward(channelID: number) {
       if (res) {
         const { id } = res.data[0];
 
-        await appwriteAPI.createChannelPointsReward({
+        await ChannelPointsDatabase.createChannelPointsReward({
           category: "minecraft",
           function: reward.function,
           rewardID: id,

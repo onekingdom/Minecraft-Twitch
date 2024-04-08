@@ -1,13 +1,11 @@
 // import "./eventsub/index";
 import dotenv from "dotenv";
 
-import { CustomRewardRequest } from "./types/twitchAPI";
-import { twitchChat } from "./classes/twitch-chat";
 import { EventsubAPI } from "./classes/twitch-eventsub";
 import { createWebSocket } from "./eventsub";
-import { EventSubNotification, WebSocketMessage } from "./types/eventsub";
-import { ChannelChatMessageCondition, ChannelPointsCustomRewardRedemptionAddCondition, ChannelUpdateCondition } from "./types/eventsubSubscribeConditions";
 import { HandleEvent } from "./eventsub/handleEvent";
+import { WebSocketMessage } from "./types/eventsub";
+import { ChannelChatMessageCondition, ChannelPointsCustomRewardRedemptionAddCondition } from "./types/eventsubSubscribeConditions";
 dotenv.config();
 
 async function main() {
@@ -22,6 +20,8 @@ async function main() {
   } else {
     conduct_id = checkconduct.data[0].id;
   }
+
+  console.log(conduct_id);
 
   let socket = createWebSocket(`wss://eventsub.wss.twitch.tv/ws`);
 
@@ -62,11 +62,8 @@ async function main() {
             //   transport: {
             //     method: "conduit",
             //     conduit_id: conduct_id,
-
             //   },
-              
             // })
-            
           }
         }
 
@@ -85,7 +82,7 @@ async function main() {
 
         if ("session" in message.payload) {
           // Reconnect to the WebSocket server
-          socket = createWebSocket(message.payload.session.reconnect_url);
+          // socket = createWebSocket(message.payload.session.reconnect_url);
         }
         break;
       case "revocation":
@@ -103,223 +100,41 @@ async function main() {
   };
 }
 
-main();
+// main();
 
 // create custom rewards for minecraft server
 
-const rewards: CustomRewardRequest[] = [
-  {
-    title: "Spawn A Random Mob",
-    cost: 500,
-    function: "minecraft:spawn_random",
-    prompt: "Spawn a random mob at the player's location",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 1800,
-  },
-  {
-    title: "Spawn Dolphins",
-    cost: 300,
-    prompt: "Spawn a random amount of dolphins at the player's location",
-    function: "minecraft:spawn_dolphin",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 900,
-  },
-  {
-    title: "Spawn Cows",
-    cost: 300,
-    prompt: "Spawn a random amount of cows at the player's location",
-    function: "minecraft:spawn_cow",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 900,
-  },
-  {
-    title: "Spawn Bees",
-    cost: 300,
-    prompt: "Spawn a random amount of bees at the player's location",
-    function: "minecraft:spawn_bee",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 1800,
-  },
-  {
-    title: "Spawn Chickens",
-    cost: 300,
-    prompt: "Spawn a random amount of chickens at the player's location",
-    function: "minecraft:spawn_chicken",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 900,
-  },
-  {
-    title: "Spawn Zombie",
-    cost: 1000,
-    prompt: "Spawn a zombie at the player's location",
-    function: "minecraft:spawn_zombie",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 1800,
-  },
-  {
-    title: "Spawn Skeleton",
-    cost: 1000,
-    prompt: "Spawn a skeleton at the player's location",
-    function: "minecraft:spawn_skeleton",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 1800,
-  },
-  {
-    title: "Spawn Creeper",
-    cost: 4000,
-    prompt: "Spawn a creeper at the player's location",
-    function: "minecraft:spawn_creeper",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 1800,
-  },
-  {
-    title: "Spawn Vindicator",
-    cost: 2000,
-    prompt: "Spawn a vindicator at the player's location",
-    function: "minecraft:spawn_vindicator",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 1800,
-  },
 
-  // jump scares
-  {
-    title: "Crazy Guy Jump Scare",
-    function: "jumpscare_crazy",
-    cost: 200,
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 900,
-  },
-  {
-    title: "Don't Turn Around Jump Scare",
-    function: "jumpscare_turn",
-    cost: 200,
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 900,
-  },
-  {
-    title: "Burning Skull Jump Scare",
-    function: "jumpscare_skull",
-    cost: 200,
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 900,
-  },
-  {
-    title: "Fake Damage Jump Scare",
-    function: "jumpscare_damage",
-    cost: 200,
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 600,
-  },
 
-  {
-    title: "Something Inside Jump Scare",
-    function: "jumpscare_door",
-    cost: 200,
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 900,
-  },
-  {
-    title: "Spinning Mobs Jump Scare",
-    function: "jumpscare_spinningmob",
-    cost: 200,
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 900,
-  },
-  {
-    title: "Spinning Player Jump Scare",
-    function: "jumpscare_spinningplayer",
-    cost: 200,
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 900,
-  },
-  // {
-  //   title: "Trap Mob Jump Scare",
-  //   function: "jumpscare_trapmob",
-  //   cost: 200,
-  //   is_global_cooldown_enabled: true,
-  //   global_cooldown_seconds: 120,
-  // },
-  // {
-  //   title: "Watching Mobs Jump Scare",
-  //   function: "jumpscare_watching",
-  //   cost: 200,
-  //   is_global_cooldown_enabled: true,
-  //   global_cooldown_seconds: 120,
-  // },
-  // {
-  //   title: "Weeping Angel Jump Scare",
-  //   function: "jumpscare_assassin",
-  //   cost: 200,
-  //   is_global_cooldown_enabled: true,
-  //   global_cooldown_seconds: 120,
-  // },
-  {
-    title: "Welcome Home Jump Scare",
-    function: "jumpscare_surprise",
-    cost: 200,
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 900,
-  },
-  {
-    title: "EnderMan Jump Scare",
-    function: "jumpscare_ender",
-    cost: 2000,
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 900,
-  },
-  // items
-  {
-    title: "Give A Random Item",
-    cost: 500,
-    prompt: "Give the players a random item",
-    function: "minecraft:random_item",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 600,
-  },
+async function subscribeToEvents(channelID: number) {
+  const res = await EventsubAPI.createEventSubSubscription<ChannelChatMessageCondition>({
+    type: "channel.chat.message",
+    version: "1",
+    condition: {
+      broadcaster_user_id: channelID.toString(),
+      user_id: process.env.TWITCH_BOT_ID!,
+    },
+    transport: {
+      method: "conduit",
+      conduit_id: "6bc745d6-faa6-4a85-bb87-907bcfd7e39b",
+    },
+  });
 
-  // disasters
-  {
-    title: "Tornado",
-    cost: 1500,
-    function: "minecraft:tornado",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 1800,
-  },
-  {
-    title: "Super Nova Level 1",
-    cost: 10000,
-    function: "minecraft:supernova1",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 1800,
-  },
-  {
-    title: "Super Nova Level 4",
-    cost: 20000,
-    function: "minecraft:supernova4",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 1800,
-  },
-  {
-    title: "Heavy Wind",
-    cost: 500,
-    function: "minecraft:wind",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 900,
-  },
-  // {
-  //   title: "Kill A Random Player",
-  //   cost: 10000,
-  //   function: "minecraft:random_kill",
-  //   is_global_cooldown_enabled: true,
-  //   global_cooldown_seconds: 600,
-  // },
+  const res2 = await EventsubAPI.createEventSubSubscription<ChannelPointsCustomRewardRedemptionAddCondition>({
+    type: "channel.channel_points_custom_reward_redemption.add",
+    version: "1",
+    condition: {
+      broadcaster_user_id: channelID.toString(),
+    },
+    transport: {
+      method: "conduit",
+      conduit_id: "6bc745d6-faa6-4a85-bb87-907bcfd7e39b",
+    },
+  });
 
-  // random
-  {
-    title: "50/50 Chance",
-    cost: 750,
-    function: "minecraft:random_50_50",
-    is_global_cooldown_enabled: true,
-    global_cooldown_seconds: 900,
-  },
-];
+  console.log(res);
+
+}
+
+// subscribeToEvents(116728530)
+main();

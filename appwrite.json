@@ -1,0 +1,24 @@
+{
+    "projectId": "66126e790010d5ab5866",
+    "projectName": "onekingdom website",
+    "functions": [
+        {
+            "$id": "66128765cdf400ae55a3",
+            "name": "twitch callback",
+            "runtime": "node-16.0",
+            "execute": [],
+            "events": ["users.*.sessions.*.create"],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "dist/index.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/twitch callback"
+        }
+    ]
+}

@@ -1,5 +1,5 @@
 import { minecraftAPI } from "../classes/Minecraft";
-import { appwriteAPI } from "../classes/appwrite";
+import { ChannelPointsDatabase } from "../classes/database-channelpoints";
 import twitchAPI from "../classes/twitch";
 import { twitchChat } from "../classes/twitch-chat";
 import { ChannelPointsCustomRewardRedemptionAddEvent } from "../types/eventsub";
@@ -8,7 +8,7 @@ export async function HandleChannelPointsRewardRedemptionAdd(event: ChannelPoint
   console.log(`[${event.broadcaster_user_name}] ${event.user_name} redeemed ${event.reward.id} for ${event.reward.cost} points`);
 
   // check DB
-  const DBResponse = await appwriteAPI.checkForChannelPointsReward(event.reward.id);
+  const DBResponse = await ChannelPointsDatabase.checkForChannelPointsReward(event.reward.id);
 
   const minecraftUUID: { username: string; UUID: string; broadcasterID: string }[] = [
     {

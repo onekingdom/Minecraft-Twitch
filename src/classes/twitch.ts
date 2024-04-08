@@ -1,8 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import dotenv from "dotenv";
 import { TwitchAPI } from "../axios/twitchAPI";
-import { appwriteAPI } from "./appwrite";
 import { ClipResponse, CustomRewardRequest, CustomRewardResponse, EventSubTopics, getChattersRequest, getChattersResponse } from "../types/twitchAPI";
+import { TwitchDatabase } from "./database-twitch";
 dotenv.config();
 
 export class twitch {
@@ -33,7 +33,7 @@ export class twitch {
   }
 
   async Config(channelID: number) {
-    const tokens = await appwriteAPI.getTokens(channelID);
+    const tokens = await TwitchDatabase.getTokens(channelID);
 
     if (tokens) {
       const config: AxiosRequestConfig = {
@@ -55,7 +55,7 @@ export class twitch {
         `https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=refresh_token&refresh_token=${refreshToken}`
       );
 
-      await appwriteAPI.updateTokens(channelID, res.data);
+      await TwitchDatabase.updateTokens(channelID, res.data);
 
       return res.data;
     } catch (error) {
