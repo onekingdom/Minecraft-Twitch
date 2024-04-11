@@ -1,5 +1,5 @@
 import { TwitchAPI } from "../axios/twitchAPI";
-import { ModifyChannelInformationRequest, getChannelSubscriptionsReponse } from "../types/twitchAPI";
+import type { ModifyChannelInformationRequest, getChannelFollowersReponse, getChannelSubscriptionsReponse } from "../types/twitchAPI";
 import { twitch } from "./twitch";
 
 class twitchChannel extends twitch {
@@ -23,6 +23,26 @@ class twitchChannel extends twitch {
     }
   }
 
+  // get channel followers
+  async getFollowers(broadcaster_id: string, user_id?: string, first?: string, after?: string) {
+    try {
+      const res = await TwitchAPI.get<getChannelFollowersReponse>(`/channels/followers`, {
+        params: {
+          user_id,
+          broadcaster_id,
+          first,
+          after,
+        },
+        broadcasterID: +broadcaster_id,
+      });
+      return res.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+
   // get channel subscribers
   async getSubsribers(broadcaster_id: string, first?: string, after?: string) {
     try {
@@ -41,6 +61,23 @@ class twitchChannel extends twitch {
     }
   }
 
+
+  // get channel vip
+  async getVip(broadcaster_id: string, user_id: string) {
+    try {
+      const res = await TwitchAPI.get(`/channels/vips`, {
+        params: {
+          broadcaster_id,
+          user_id,
+        },
+        broadcasterID: +broadcaster_id,
+      });
+      return res.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 
   
 }

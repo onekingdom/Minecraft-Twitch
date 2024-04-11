@@ -1,12 +1,10 @@
 import { HandleChannelPointsRewardRedemptionAdd } from "../functions/HandleChannelPointsRewardRedemptionAdd";
 import handleChannelUpdate from "../functions/handleChannelUpdate";
-import { HandleChatMessage } from "../functions/handleChat";
-import { ChatMessageEvent, EventSubNotification } from "../types/eventsub";
-import { EventSubTopics } from "../types/twitchAPI";
+import { HandleChatMessage } from "../functions/handle-chat";
+import type { ChatMessageEvent, EventSubNotification } from "../types/eventsub";
+import type { EventSubTopics } from "../types/twitchAPI";
 
 export async function HandleEvent(event: EventSubNotification) {
-
-
   switch (event.payload.subscription.type as EventSubTopics) {
     case "channel.chat.message":
       HandleChatMessage(event.payload.event as ChatMessageEvent);
@@ -19,5 +17,8 @@ export async function HandleEvent(event: EventSubNotification) {
     case "channel.update":
       handleChannelUpdate(event.payload.event as any);
       break;
+
+    default:
+      console.log("Unhandled event", event);
   }
 }

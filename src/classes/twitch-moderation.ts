@@ -1,5 +1,5 @@
 import { TwitchAPI } from "../axios/twitchAPI";
-import { GetModeratorsResponse } from "../types/twitchAPI";
+import type { GetModeratorsResponse } from "../types/twitchAPI";
 import { twitch } from "./twitch";
 
 class twitch_moderation extends twitch {

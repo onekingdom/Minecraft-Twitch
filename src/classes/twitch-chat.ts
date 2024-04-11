@@ -1,6 +1,6 @@
 import { TwitchAPI } from "../axios/twitchAPI";
 import { TwitchAPP } from "../axios/twitchApp";
-import {
+import type {
   ChannelBadgeResponse,
   ChatSettingsResponse,
   SencChatAnnouncementRequest,
@@ -211,12 +211,12 @@ class TwitchChat {
   }
 
   // send Message
-  async sendMessage(message: SendChatMessageRequest): Promise<SendChatMessageResponse> {
+  async sendMessage(message: SendChatMessageRequest,): Promise<SendChatMessageResponse> {
     try {
       const res = await TwitchAPP.post(`/chat/messages`, {
         ...message,
         sender_id: this.bot_id,
-      });
+      },);
       return res.data;
     } catch (error) {
       console.log(error);

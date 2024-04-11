@@ -1,9 +1,15 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
-import dotenv from "dotenv";
+import axios from "axios";
+import type { AxiosInstance, AxiosRequestConfig } from "axios";
 import { TwitchAPI } from "../axios/twitchAPI";
-import { ClipResponse, CustomRewardRequest, CustomRewardResponse, EventSubTopics, getChattersRequest, getChattersResponse } from "../types/twitchAPI";
-import { TwitchDatabase } from "./database-twitch";
-dotenv.config();
+import { appwriteAPI } from "./appwrite";
+import type {
+  ClipResponse,
+  CustomRewardRequest,
+  CustomRewardResponse,
+  EventSubTopics,
+  getChattersRequest,
+  getChattersResponse,
+} from "../types/twitchAPI";
 
 export class twitch {
   protected clientID = process.env.TWITCH_CLIENT_ID;
@@ -12,7 +18,18 @@ export class twitch {
 
   constructor() {}
 
+  // create app Token
+  async createAppToken() {
+    try {
+      const res = await axios.post(
+        `https://id.twitch.tv/oauth2/token?client_id=${this.clientID}&client_secret=${this.clientSecret}&grant_type=client_credentials`
+      );
 
+      return res.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   async getChatters({ broadcaster_id, moderator_id, after, first }: getChattersRequest): Promise<getChattersResponse> {
     try {
@@ -33,7 +50,7 @@ export class twitch {
   }
 
   async Config(channelID: number) {
-    const tokens = await TwitchDatabase.getTokens(channelID);
+    const tokens = await appwriteAPI.getTokens(channelID);
 
     if (tokens) {
       const config: AxiosRequestConfig = {
@@ -50,15 +67,18 @@ export class twitch {
   }
 
   async RefreshToken(refreshToken: string, channelID: number) {
+    console.log(refreshToken, channelID);
+
     try {
       const res = await axios.post(
         `https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=refresh_token&refresh_token=${refreshToken}`
       );
 
-      await TwitchDatabase.updateTokens(channelID, res.data);
+      await appwriteAPI.updateTokens(channelID, res.data);
 
       return res.data;
     } catch (error) {
+      console.error("error refreshing token");
       console.log(error);
     }
   }

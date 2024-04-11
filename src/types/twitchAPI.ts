@@ -415,7 +415,7 @@ export interface SencChatAnnouncementRequest {
 
 export interface SendChatMessageRequest {
   broadcaster_id: string;
-  // sender_id: string;
+  sender_id: string;
   message: string;
   reply_parent_message_id?: string;
 }
@@ -509,4 +509,16 @@ export interface getChannelSubscriptionsReponse {
   points: number; // The current number of subscriber points earned by this broadcaster. Points are based on the subscription tier of each user that subscribes to this broadcaster. For example, a Tier 1 subscription is worth 1 point, Tier 2 is worth 2 points, and Tier 3 is worth 6 points. The number of points determines the number of emote slots that are unlocked for the broadcaster.
 
   total: number; // The total number of users that subscribe to this broadcaster.
+}
+
+interface Follower {
+  followed_at: string; // The UTC timestamp when the user started following the broadcaster
+  user_id: string; // An ID that uniquely identifies the user that’s following the broadcaster
+  user_login: string; // The user’s login name
+  user_name: string; // The user’s display name
+}
+export interface getChannelFollowersReponse {
+  data: Follower[]; // The list of users that follow the specified broadcaster
+  pagination: Pagination; // Contains the information used to page through the list of results
+  total: number; // The total number of users that follow this broadcaster
 }

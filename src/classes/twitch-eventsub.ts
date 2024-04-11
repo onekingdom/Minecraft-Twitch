@@ -1,7 +1,7 @@
 import axios from "axios";
 import { twitch } from "./twitch";
 import { TwitchAPP } from "../axios/twitchApp";
-import {
+import type {
   CreateEventSubSubscriptionRequest,
   CreateEventSubSubscriptionResponse,
   GetEventSubSubscriptionsRequest,
@@ -103,14 +103,18 @@ class TwitchEventSub extends twitch {
     }
   }
   // create a new subscription
-  public async createEventSubSubscription<T>({condition,transport, type, version}: CreateEventSubSubscriptionRequest<T>): Promise<CreateEventSubSubscriptionResponse> {
+  public async createEventSubSubscription<T>({
+    condition,
+    transport,
+    type,
+    version,
+  }: CreateEventSubSubscriptionRequest<T>): Promise<CreateEventSubSubscriptionResponse> {
     try {
       const response = await TwitchAPP.post("/eventsub/subscriptions", {
         type,
         version,
         condition,
         transport,
-      
       });
       return response.data;
     } catch (error) {
@@ -118,7 +122,6 @@ class TwitchEventSub extends twitch {
       throw error;
     }
   }
-
 
   // delete a subscription
   public async deleteEventSubSubscription(subscriptionID: string): Promise<void> {
@@ -129,8 +132,6 @@ class TwitchEventSub extends twitch {
       throw error;
     }
   }
-
-
 
   // get all subscriptions
   public async getEventSubSubscriptions({

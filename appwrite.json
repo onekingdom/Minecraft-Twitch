@@ -1,5 +1,5 @@
 {
-    "projectId": "66126e790010d5ab5866",
+    "projectId": "658fab9280f434656e3b",
     "projectName": "onekingdom website",
     "functions": [
         {
@@ -7,7 +7,9 @@
             "name": "twitch callback",
             "runtime": "node-16.0",
             "execute": [],
-            "events": ["users.*.sessions.*.create"],
+            "events": [
+                "users.*.sessions.*.create"
+            ],
             "schedule": "",
             "timeout": 15,
             "enabled": true,
@@ -19,6 +21,42 @@
                 ".npm"
             ],
             "path": "functions/twitch callback"
+        },
+        {
+            "$id": "661518833cb1c69b9a1b",
+            "name": "create command collection",
+            "runtime": "bun-1.0",
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.ts",
+            "commands": "bun install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/create command collection"
+        },
+        {
+            "$id": "66151a8eca273340923e",
+            "name": "command collection",
+            "runtime": "node-16.0",
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules",
+                ".npm"
+            ],
+            "path": "functions/command collection"
         }
     ]
 }

@@ -1,5 +1,5 @@
 import { TwitchAPI } from "../axios/twitchAPI";
-import { CustomRewardRequest, CustomRewardResponse } from "../types/twitchAPI";
+import type { CustomRewardRequest, CustomRewardResponse } from "../types/twitchAPI";
 import { twitch } from "./twitch";
 
 class channelPointsAPI extends twitch {

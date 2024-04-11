@@ -1,6 +1,7 @@
-import axios, { AxiosRequestConfig, RawAxiosRequestHeaders } from "axios";
+import axios from "axios";
+import type { AxiosRequestConfig } from "axios";
+import { appwriteAPI } from "../classes/appwrite";
 import twitchAPI from "../classes/twitch";
-import { TwitchDatabase } from "../classes/database-twitch";
 
 const TwitchAPI = axios.create({
   baseURL: "https://api.twitch.tv/helix",
@@ -13,7 +14,7 @@ const TwitchAPI = axios.create({
 TwitchAPI.interceptors.request.use(
   async (config) => {
     // Assuming you have a method to get the current token...
-    const tokens = await TwitchDatabase.getTokens(config.broadcasterID!)
+    const tokens = await appwriteAPI.getTokens(config.broadcasterID!);
     if (tokens) {
       config.headers["Authorization"] = `Bearer ${tokens.accessToken}`;
     }
@@ -41,9 +42,7 @@ TwitchAPI.interceptors.response.use(
       //get the channel from the request
       const channelID = error.response?.config.broadcasterID;
 
-      const tokens = await TwitchDatabase.getTokens(channelID);
-
-
+      const tokens = await appwriteAPI.getTokens(channelID);
       if (!tokens) {
         console.log("Tokens not found");
         return;
@@ -51,6 +50,11 @@ TwitchAPI.interceptors.response.use(
 
       //fetch the new accessToken and update the tokens
       const newToken = await twitchAPI.RefreshToken(tokens.refreshToken, channelID);
+
+      if (!newToken) {
+        console.log("Error refreshing token");
+        return;
+      }
 
       //update the headers for the new request
       originalRequest.headers["Authorization"] = "Bearer " + newToken.access_token;

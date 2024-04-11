@@ -1,4 +1,4 @@
-import { Models } from "node-appwrite";
+import type { Models } from "node-appwrite";
 
 export type ChatMessage = {
   broadcaster_name: string;
@@ -17,6 +17,7 @@ export interface Tokens extends Models.Document {
   refreshToken: string;
   channelID: number;
   accessToken: string;
+  userid: string;
 }
 
 export interface channelPointsStorage extends Models.Document {
