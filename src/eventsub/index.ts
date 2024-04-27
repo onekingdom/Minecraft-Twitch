@@ -5,13 +5,11 @@ import { HandleEvent } from "./handleEvent";
 const socket = new WebSocket("wss://eventsub.wss.twitch.tv/ws");
 
 // message is received
-socket.addEventListener  ("message", async (event) => {
+socket.addEventListener("message", async (event) => {
   const message = JSON.parse(event.data.toString());
   // console.log(message);
 
   await handleWebSocketMessage(message);
-
-
 });
 
 // socket opened
@@ -34,11 +32,10 @@ socket.addEventListener("error", (event) => {
 const handleWebSocketMessage = async (message: WebSocketMessage) => {
   // console.log(message);
 
-
   switch (message.metadata.message_type) {
     case "session_welcome":
       // get the conduct id
-      const id = await EventsubAPI.getConducts(); 
+      const id = await EventsubAPI.getConducts();
 
       if ("session" in message.payload) {
         //  handle condicts
@@ -57,17 +54,19 @@ const handleWebSocketMessage = async (message: WebSocketMessage) => {
         });
 
         if (res.data[0].status === "enabled") {
-          // const res = await  EventsubAPI.createEventSubSubscription<ChannelUpdateCondition>({
-          //   type: "channel.update",
-          //   version: "1",
-          //   condition: {
-          //     broadcaster_user_id: "122604941",
-          //   },
-          //   transport: {
-          //     method: "conduit",
-          //     conduit_id: conduct_id,
-          //   },
-          // })
+        //   const res = await EventsubAPI.createEventSubSubscription({
+        //     type: "channel.chat.message",
+        //     version: "1",
+        //     condition: {
+        //       broadcaster_user_id: "122604941",
+        //       user_id: "122604941",
+        //     },
+        //     transport: {
+        //       method: "conduit",
+        //       conduit_id: id.data[0].id,
+        //     },
+        //   });
+         
         }
       }
 

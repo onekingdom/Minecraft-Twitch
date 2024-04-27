@@ -30,8 +30,9 @@ export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
       broadcaster_id: +broadcaster_user_id,
       userlevel: foundCommand.userlevel,
       chatter_id: +chatter_user_id,
-    });
+    });    
 
+    // if the user does not have permission to use the command
     if (!hasPermission) {
       await twitchChat.sendMessage({
         broadcaster_id: broadcaster_user_id,
@@ -42,7 +43,8 @@ export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
       return;
     }
 
-    if (foundCommand.action) {
+    // check if the command has an action
+    if (foundCommand.action && foundCommand.action !== "" && foundCommand.action !== "null") {
       const responseMessage= await handle_action(foundCommand.action, args, +broadcaster_user_id, chatter_user_name);
 
       if (responseMessage) {

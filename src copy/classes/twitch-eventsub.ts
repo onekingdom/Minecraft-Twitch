@@ -1,3 +1,5 @@
+import axios from "axios";
+
 import { TwitchAPP } from "../axios/twitchApp";
 import type {
   CreateEventSubSubscriptionRequest,
@@ -15,12 +17,9 @@ import type {
   getConduitShardsResponse,
   getConduitsResponse,
 } from "../types/twitchAPI";
-import { twitch } from "./twitch";
 
-class TwitchEventSub extends twitch {
-  constructor() {
-    super();
-  }
+class TwitchEventSub {
+  constructor() {}
 
   //get all conduits
   async getConducts(): Promise<getConduitsResponse> {

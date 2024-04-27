@@ -213,10 +213,7 @@ class TwitchChat {
   // send Message
   async sendMessage(message: SendChatMessageRequest,): Promise<SendChatMessageResponse> {
     try {
-      const res = await TwitchAPP.post(`/chat/messages`, {
-        ...message,
-        sender_id: this.bot_id,
-      },);
+      const res = await TwitchAPP.post(`/chat/messages`, message,);
       return res.data;
     } catch (error) {
       console.log(error);

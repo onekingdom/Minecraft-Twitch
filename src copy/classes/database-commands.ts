@@ -1,8 +1,6 @@
 import { ID, Permission, Query, Role } from "node-appwrite";
 import { database } from "../lib/appwrite";
 import type { Command, CommandStorage } from "../types/database";
-import { appwriteAPI } from "./appwrite";
-import { supabase } from "../lib/supabase";
 
 class commandDatabase {
   databaseID: string;
@@ -43,38 +41,37 @@ class commandDatabase {
 
   // find command
   async findCommand(command: string, channelID: number) {
-    const {data, error, count} = await supabase.from("commands").select("*").eq("command", command).eq("channel_id", channelID)
-
-    
-    if (error) {  
-      console.log(error);
-      return;
+    const res = await database.listDocuments<CommandStorage>(this.databaseID, channelID.toString(), [
+      Query.startsWith("command", command),
+      Query.equal("channelID", channelID),
+    ]);
+    if (res.documents.length > 0) {
+      return res.documents[0];
     }
-
-    if(count === 0 || data.length === 0) {
-      return
-    }
-
-
-    
-    return data[0];
-
-
     return;
   }
 
-  async createCollections(channelID: number, channelName: string) {
-    const user = await appwriteAPI.getTokens(channelID);
 
-    if (!user) return;
-    console.log(user);
 
+  // find collection
+  async findCollection(channelID: number): Promise<boolean> {
+    try {
+      const res = await database.getCollection(this.databaseID, channelID.toString());
+      return true;
+    } catch (error) {
+      return false;
+    }
+
+  }
+
+
+  async createCollections(channelID: number, channelName: string, user_id: string) {  
     // create collection
     const res = await database.createCollection(
       this.databaseID,
       channelID.toString(),
       channelName,
-      [Permission.read(Role.user(user.userid)), Permission.write(Role.user(user.userid))],
+      [Permission.read(Role.user(user_id)), Permission.write(Role.user(user_id))],
       true
     );
 
