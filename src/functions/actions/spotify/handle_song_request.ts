@@ -63,6 +63,12 @@ export default async function (action: string, args: string[], channelID: number
     }
 
     song_data = searchResult.tracks.items[0];
+
+    const added = await spotifyAPI.add_song_to_queue(song_data.uri, channelID);
+
+    if (!added) {
+      return "Failed to add song to queue";
+    }
   }
 
   const { name: song, artists } = song_data;

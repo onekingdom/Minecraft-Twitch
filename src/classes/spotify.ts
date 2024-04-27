@@ -75,6 +75,7 @@ class spotify_api {
     console.log(uri);
     try {
       const response = await SpotifyAPI.get<TrackObjectFull>(`/tracks/${uri}`, { broadcasterID: channel_id });
+      
 
       if (response.status === 200) {
         return response.data;
