@@ -1,9 +1,15 @@
 import { spotifyAPI } from "../../../classes/spotify";
 import { TrackObjectFull } from "../../../types/spotify-web-api";
 
-export default async function (action: string, args: string[], channelID: number, chatter_name: string): Promise<string | undefined> {
+
+
+export default async function (args: string[], channelID: number, message: string): Promise<TrackObjectFull> {
   const searchQuery = args.join(" ");
   let song_data: TrackObjectFull;
+
+  // remove the RexEx from the message
+  
+  
 
   // check if the serach query is a URL
   if (searchQuery.includes("https://open.spotify.com/")) {
@@ -11,7 +17,7 @@ export default async function (action: string, args: string[], channelID: number
     const pathParts = url.pathname.split("/");
 
     if (pathParts.length !== 3 || pathParts[0] !== "") {
-      return "Invalid Spotify URL";
+      throw new Error("Invalid URL");
     }
 
     const uri = `spotify:track:${pathParts[2]}`;
@@ -19,13 +25,13 @@ export default async function (action: string, args: string[], channelID: number
     const added = await spotifyAPI.add_song_to_queue(uri, channelID);
 
     if (!added) {
-      return "Failed to add song to queue";
+      throw new Error("Failed to add song to queue");
     }
 
     const song_data_res = await spotifyAPI.get_song_data(pathParts[2], channelID);
 
     if (!song_data_res) {
-      return "Failed to get song data but the song was added to queue";
+      throw new Error("Failed to get song data but the song was added to queue");
     }
 
     song_data = song_data_res;
@@ -39,17 +45,17 @@ export default async function (action: string, args: string[], channelID: number
     const added = await spotifyAPI.add_song_to_queue(uri, channelID);
 
     if (!added) {
-      return "Failed to add song to queue";
+      throw new Error("Failed to add song to queue");
     }
 
     if (!added) {
-      return "Failed to add song to queue";
+      throw new Error("Failed to add song to queue");
     }
 
     const song_data_res = await spotifyAPI.get_song_data(id, channelID);
 
     if (!song_data_res) {
-      return "Failed to get song data but the song was added to queue";
+      throw new Error("Failed to get song data but the song was added to queue");
     }
 
     song_data = song_data_res;
@@ -59,7 +65,7 @@ export default async function (action: string, args: string[], channelID: number
     const searchResult = await spotifyAPI.search_spotify(searchQuery, channelID);
 
     if (!searchResult || !searchResult.tracks) {
-      return "No song found";
+      throw new Error("Failed to search spotify");
     }
 
     song_data = searchResult.tracks.items[0];
@@ -67,13 +73,15 @@ export default async function (action: string, args: string[], channelID: number
     const added = await spotifyAPI.add_song_to_queue(song_data.uri, channelID);
 
     if (!added) {
-      return "Failed to add song to queue";
+      throw new Error("Failed to add song to queue");
     }
   }
 
   const { name: song, artists } = song_data;
+  
 
-  return `Song request for ${song} by ${artists.map((artist) => artist.name).join(", ")}`;
+  
 
-  return;
+  return song_data;
+
 }

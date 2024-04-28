@@ -1,19 +1,33 @@
 import twitchAPI from "../classes/twitch";
 import { TwitchChannel } from "../classes/twitch-channel";
+const variableRegex = /\${(.*?)}/g;
 
-export async function handleVariable(varable: string, channel: string, channelID: number, user: string) {
-  const intergartion = varable.split(".");
+interface Props {
+  varable: string;
+  channel: string;
+  channelID: number;
+  chatter_name: string;
+  chatter_id: string;
+}
 
-  switch (intergartion[0]) {
-    case "user":
-      switch (intergartion[1]) {
+export async function handleVariable({ channel, channelID, chatter_name, chatter_id, varable }: Props) {
+  const intergartion = varable.replace(variableRegex, "$1").split(".");
+
+  let catagory = intergartion[0];
+  let _varable = intergartion[1];
+
+
+  switch (catagory) {
+    case "chatter":
+      switch (_varable) {
         case "name":
-          return user;
+          return chatter_name;
         case "id":
+          return chatter_id;
       }
 
     case "channel":
-      switch (intergartion[1]) {
+      switch (_varable) {
         case "name":
           return channel;
         case "id":
@@ -23,5 +37,8 @@ export async function handleVariable(varable: string, channel: string, channelID
 
           return subsribers.total;
       }
+
+    default:
+      return varable;
   }
 }
