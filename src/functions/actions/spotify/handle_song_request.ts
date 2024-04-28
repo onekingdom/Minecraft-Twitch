@@ -42,23 +42,27 @@ export default async function (args: string[], channelID: number, message: strin
     const uri = searchQuery;
     const id = searchQuery.split(":")[2];
 
-    const added = await spotifyAPI.add_song_to_queue(uri, channelID);
-
+    const [added, song_data_res] = await Promise.all([
+      spotifyAPI.add_song_to_queue(uri, channelID),
+      spotifyAPI.get_song_data(id, channelID)
+    ]);
+    
+    
+    
     if (!added) {
       throw new Error("Failed to add song to queue");
     }
-
+    
     if (!added) {
       throw new Error("Failed to add song to queue");
     }
-
-    const song_data_res = await spotifyAPI.get_song_data(id, channelID);
-
+    
+    
     if (!song_data_res) {
       throw new Error("Failed to get song data but the song was added to queue");
     }
-
     song_data = song_data_res;
+
   }
   // search spotify for the song
   else {
@@ -77,7 +81,7 @@ export default async function (args: string[], channelID: number, message: strin
     }
   }
 
-  const { name: song, artists } = song_data;
+
   
 
   

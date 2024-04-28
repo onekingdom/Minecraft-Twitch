@@ -51,7 +51,6 @@ export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
     // check if the command has variables
     let variableObjectArray = checkvariable(messageToSend);
 
-    console.log(variableObjectArray);
 
     // handle the variables
     const newArray = await Promise.all(

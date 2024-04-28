@@ -72,7 +72,6 @@ class spotify_api {
 
   // get song data based of uri
   async get_song_data(uri: string, channel_id: number) {
-    console.log(uri);
     try {
       const response = await SpotifyAPI.get<TrackObjectFull>(`/tracks/${uri}`, { broadcasterID: channel_id });
       

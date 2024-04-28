@@ -1,5 +1,4 @@
 export default function checkVariable(inputString: string): { word: string, variable: boolean }[] {
-  console.log(inputString);
 
   const regex = /(?:^|\s)(\$\{[^{}]*\})(?=\s|$)/g;
 
