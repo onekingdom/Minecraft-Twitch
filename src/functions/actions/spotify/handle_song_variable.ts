@@ -9,19 +9,34 @@ export default function handleSongVariable(song: TrackObjectFull, varable: strin
   // remove the RexEx from the message
   // remove the ${} from the variable
 
-  console.log(_varable);
+  console.log();
+  
 
   
 
-  switch (_varable) {
-    case "name":
-      return song.name;
-
-    case "artists":
-      return song.artists.map((artist) => artist.name);
-
-
+  switch (intergartion[0]) {
+    case "song":
+      switch (_varable) {
+        case "name":
+          return song.name;
+        case "artist":
+          return song.artists[0].name;
+        case "album":
+          return song.album.name;
+        case "url":
+          return song.external_urls.spotify;
+        case "image":
+          return song.album.images[0].url;
+        case "release_date":
+          return song.album.release_date;
+        default:
+          return varable;
+      }
     default:
       return varable;
+
+
+
   }
+
 }
