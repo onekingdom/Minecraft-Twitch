@@ -1830,7 +1830,7 @@ interface PlaybackObject {
   repeat_state: "off" | "track" | "context";
 }
 
-interface CurrentlyPlayingObject {
+export interface CurrentlyPlayingObject {
   timestamp: number;
   device: UserDevice;
   actions: ActionsObject;

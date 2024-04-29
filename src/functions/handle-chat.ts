@@ -43,7 +43,14 @@ export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
 
     // check if the command has an action
     if (foundCommand.action && foundCommand.action !== "" && foundCommand.action !== "null" && hasPermission) {
-      const responseMessage = await handle_action(foundCommand.action, args, +broadcaster_user_id, chatter_user_name, foundCommand.message);
+      const responseMessage = await handle_action({
+        action: foundCommand.action,
+        args,
+        broadcaster_id: +broadcaster_user_id,
+        chatter_id: chatter_user_id,
+        chatter_name: chatter_user_name,
+        return_message: messageToSend,
+      });
 
       if (responseMessage) messageToSend = responseMessage;
     }

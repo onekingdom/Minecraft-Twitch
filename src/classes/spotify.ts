@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { SpotifyAPI } from "../axios/spotifyAPI";
 import { supabase } from "../lib/supabase";
-import { RefreshAccessToken, SearchResponse, TrackObjectFull } from "../types/spotify-web-api";
+import { CurrentlyPlayingObject, RefreshAccessToken, SearchResponse, TrackObjectFull } from "../types/spotify-web-api";
 
 class spotify_api {
   private client_id: string;
@@ -57,7 +57,6 @@ class spotify_api {
   async search_spotify(query: string, channel_id: number) {
     try {
       const response = await SpotifyAPI.get<SearchResponse>(`/search?q=${query}&type=track&limit=1`, { broadcasterID: channel_id });
-      
 
       if (response.status === 200) {
         return response.data;
@@ -74,7 +73,6 @@ class spotify_api {
   async get_song_data(uri: string, channel_id: number) {
     try {
       const response = await SpotifyAPI.get<TrackObjectFull>(`/tracks/${uri}`, { broadcasterID: channel_id });
-      
 
       if (response.status === 200) {
         return response.data;
@@ -86,7 +84,6 @@ class spotify_api {
       console.log(error.response.data);
     }
   }
-
 
   // add song to queue
   async add_song_to_queue<UsersQueueResponse>(uri: string, channel_id: number) {
@@ -100,7 +97,21 @@ class spotify_api {
       }
     } catch (error: any) {
       console.log("Error adding song to queue:");
-     
+    }
+  }
+
+  async get_current_song(channel_id: number) {
+    try {
+      const response = await SpotifyAPI.get<CurrentlyPlayingObject>("/me/player/currently-playing", { broadcasterID: channel_id });
+
+      if (response.status === 200) {
+        return response.data;
+      } else {
+        throw new Error("Failed to get current song");
+      }
+    } catch (error: any) {
+      console.log("Error getting current song:");
+      console.log(error.response.data);
     }
   }
 }
