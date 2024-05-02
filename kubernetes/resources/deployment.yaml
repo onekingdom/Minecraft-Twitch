@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: streamwizard-backend
-          image: ghcr.io/onekingdom/onekingdom-bot:4077847b3ee46f7de4682e0a034b8821e9603050
+          image: ghcr.io/onekingdom/onekingdom-bot:3db7570cd1aee8aae72c1c5612013164a1ed5891
           ports:
             - containerPort: 80
           envFrom:
