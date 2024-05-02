@@ -37,12 +37,10 @@ export function startCheckingCurrentSong(broadcaster_id: number): void {
 
     const queue = await supabase.from("spotify_queue").select("*").eq("broadcaster_id", broadcaster_id);
 
-    console.log(queue.data);
-
     if (!queue.data) {
       console.log("no queue data found");
 
-      return;
+      return stopCheckingCurrentSong(broadcaster_id);
     }
 
   
@@ -74,7 +72,7 @@ export function startCheckingCurrentSong(broadcaster_id: number): void {
         }
       }
     });
-  }, 5000) as NodeJS.Timeout; // 5000 milliseconds = 5 seconds
+  }, 2000) as NodeJS.Timeout; // 5000 milliseconds = 5 seconds
 }
 
 export function stopCheckingCurrentSong(broadcaster_id: number): void {

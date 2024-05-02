@@ -15,11 +15,8 @@ export default async function ({ args, broadcaster_id, broadcaster_name, chatter
   const searchQuery = args.join(" ");
   let song_data: TrackObjectFull | undefined;
 
-  const { data: spotify_settings } = await supabase.from("spotify_settings").select("*").eq("broadcaster_id", broadcaster_id.toString()).single();
 
-  if (!spotify_settings) {
-    throw new Error("Spotify settings not found in the database");
-  }
+
 
   // check if the serach query is a URL
   if (searchQuery.includes("https://open.spotify.com/")) {
@@ -54,6 +51,17 @@ export default async function ({ args, broadcaster_id, broadcaster_name, chatter
   if (!song_data) {
     throw new Error("Song not found");
   }
+
+  const { data: spotify_settings } = await supabase.from("spotify_settings").select("*, spotify_banned_songs(*)").eq("broadcaster_id", broadcaster_id).eq("spotify_banned_songs.song_id", song_data.id);
+
+  console.log(spotify_settings);
+
+  if (!spotify_settings) {
+    throw new Error("Spotify settings not found in the database");
+  }
+
+
+
 
   // check if the song is already in the queue
   const { data: queue } = await supabase
