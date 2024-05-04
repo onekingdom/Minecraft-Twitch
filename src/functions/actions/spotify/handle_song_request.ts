@@ -2,6 +2,8 @@ import { spotifyAPI } from "../../../classes/spotify";
 import { TrackObjectFull } from "../../../types/spotify-web-api";
 import { supabase } from "../../../lib/supabase";
 import { isCheckingCurrentSong, startCheckingCurrentSong, stopCheckingCurrentSong } from "./handle_song_request_queue";
+import get_song_uri from "./get_song_id";
+import get_song_id from "./get_song_id";
 
 interface SpotifySettings {
   broadcaster_id: number;
@@ -15,63 +17,72 @@ export default async function ({ args, broadcaster_id, broadcaster_name, chatter
   const searchQuery = args.join(" ");
   let song_data: TrackObjectFull | undefined;
 
-
-
-
-  // check if the serach query is a URL
-  if (searchQuery.includes("https://open.spotify.com/")) {
-    const url = new URL(searchQuery);
-    const pathParts = url.pathname.split("/");
-
-    if (pathParts.length !== 3 || pathParts[0] !== "") {
-      throw new Error("Invalid URL");
-    }
-
-    const song_data_res = await spotifyAPI.get_song_data(pathParts[2], broadcaster_id);
-
-    song_data = song_data_res;
-  }
-
   // check if the search query is a spotify uri
-  else if (searchQuery.includes("spotify:track:")) {
-    const id = searchQuery.split(":")[2];
-    const song_data_res = await Promise.all([spotifyAPI.get_song_data(id, broadcaster_id)]);
-    song_data = song_data_res[0];
-  }
-  // search spotify for the song
-  else {
-    const searchResult = await spotifyAPI.search_spotify(searchQuery, broadcaster_id);
-    if (!searchResult || !searchResult.tracks) {
-      throw new Error("Failed to search spotify");
-    }
+  const id = get_song_id(searchQuery);
 
-    song_data = searchResult.tracks.items[0];
+    if (id) {
+    song_data = await spotifyAPI.get_song_data(id, broadcaster_id);
+  } else {
+    const search = await spotifyAPI.search_spotify(searchQuery, broadcaster_id);
+    song_data = search?.tracks?.items[0];
   }
 
+
+
+  // check if the song was found
   if (!song_data) {
-    throw new Error("Song not found");
+    throw ("Song not found");
   }
 
-  const { data: spotify_settings } = await supabase.from("spotify_settings").select("*, spotify_banned_songs(*)").eq("broadcaster_id", broadcaster_id).eq("spotify_banned_songs.song_id", song_data.id);
-
-  console.log(spotify_settings);
+  // get the spotify settings
+  const { data: spotify_settings } = await supabase
+    .from("spotify_settings")
+    .select("*, spotify_banned_chatters(chatter_id), spotify_banned_songs(song_id)")
+    .eq("broadcaster_id", broadcaster_id)
+    .lte("spotify_banned_chatters.chatter_id", chatter_id)
+    .single();
 
   if (!spotify_settings) {
-    throw new Error("Spotify settings not found in the database");
+    throw "Spotify settings not found in the database";
   }
 
+  // check if the chatter is banned3
+  if (spotify_settings.spotify_banned_chatters && spotify_settings.spotify_banned_chatters.length > 0) {
+    throw "You are banned from requesting songs";
+  }
 
+  //check if the song is banned
+  if (spotify_settings.spotify_banned_songs && spotify_settings.spotify_banned_songs.length > 0) {
+    const song_banned = spotify_settings.spotify_banned_songs.find((song: { song_id: string }) => song.song_id === song_data.id);
 
+    if (song_banned) {
+      throw `Sorry, the song ${song_data.name} is banned from being requested`;
+    }
+  }
 
   // check if the song is already in the queue
-  const { data: queue } = await supabase
-    .from("spotify_queue")
-    .select("*")
-    .eq("broadcaster_id", broadcaster_id.toString())
-    .eq("song_id", song_data.id);
+  const { data: queue } = await supabase.from("spotify_queue").select("song_id, chatter_id").eq("broadcaster_id", broadcaster_id.toString());
 
+  // check if the song is already in the queue
   if (queue && queue.length > 0) {
-    throw new Error("Song is already in the queue");
+    const song_in_queue = queue.find((song) => song.song_id === song_data.id);
+
+    if (song_in_queue) {
+      throw "Song is already in the queue";
+    }
+
+    // check if the queue is full
+    if (queue.length >= spotify_settings.global_queue_limit) {
+      throw "Queue is full";
+    }
+
+    // find all the songs that the chatter has requested
+    const songs_requested = queue.filter((song) => song.chatter_id === chatter_id);
+
+    // check if the chatter has requested more than 2 songs
+    if (songs_requested.length >= spotify_settings.chatter_queue_limit) {
+      throw `You can only request ${spotify_settings.chatter_queue_limit} songs at a time`;
+    }
   }
 
   const queue_obj = {
@@ -87,7 +98,7 @@ export default async function ({ args, broadcaster_id, broadcaster_name, chatter
   const added = await spotifyAPI.add_song_to_queue(song_data.uri, broadcaster_id);
 
   if (!added) {
-    throw new Error("Failed to add song to spotify queue");
+    throw "Failed to add song to spotify queue";
   }
 
   // add the song to the queue
@@ -100,7 +111,7 @@ export default async function ({ args, broadcaster_id, broadcaster_name, chatter
 
   if (error) {
     console.log(error);
-    throw new Error("Failed to add song to database queue");
+    throw "Failed to add song to database queue";
   }
 
   return song_data;

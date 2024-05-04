@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { AxiosRequestConfig } from "axios";
-import { appwriteAPI } from "../classes/appwrite";
 import twitchAPI from "../classes/twitch";
+import { supabase } from "@/lib/supabase";
 
 const TwitchAPI = axios.create({
   baseURL: "https://api.twitch.tv/helix",
@@ -13,11 +13,18 @@ const TwitchAPI = axios.create({
 
 TwitchAPI.interceptors.request.use(
   async (config) => {
-    // Assuming you have a method to get the current token...
-    const tokens = await appwriteAPI.getTokens(config.broadcasterID!);
-    if (tokens) {
-      config.headers["Authorization"] = `Bearer ${tokens.accessToken}`;
+    // Assuming you have a method to get the current token...]
+
+    console.log("TwitchAPI.interceptors.request.use")
+
+    const {data} = await supabase.from("twitch_integration").select("*").eq("broadcaster_id", config.broadcasterID?.toString()).single();
+    if (data?.access_token) {
+
+      config.headers["Authorization"] = `Bearer ${data.access_token}`;
     }
+
+
+
     return config;
   },
   (error) => {
@@ -42,14 +49,14 @@ TwitchAPI.interceptors.response.use(
       //get the channel from the request
       const channelID = error.response?.config.broadcasterID;
 
-      const tokens = await appwriteAPI.getTokens(channelID);
-      if (!tokens) {
+      const {data, error: DBerror} = await supabase.from("twitch_integration").select("refresh_token").eq("broadcaster_id", channelID).single();
+      if (DBerror) {
         console.log("Tokens not found");
         return;
       }
 
       //fetch the new accessToken and update the tokens
-      const newToken = await twitchAPI.RefreshToken(tokens.refreshToken, channelID);
+      const newToken = await twitchAPI.RefreshToken(data.refresh_token, channelID);
 
       if (!newToken) {
         console.log("Error refreshing token");

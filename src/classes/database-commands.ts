@@ -43,7 +43,7 @@ class commandDatabase {
 
   // find command
   async findCommand(command: string, channelID: number) {
-    const {data, error, count} = await supabase.from("commands").select("*").eq("command", command).eq("channel_id", channelID)
+    const {data, error, count} = await supabase.from("commands").select("*").eq("command", command).eq("broadcaster_id", channelID)
 
     
     if (error) {  

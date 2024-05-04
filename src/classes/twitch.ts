@@ -10,6 +10,7 @@ import type {
   getChattersRequest,
   getChattersResponse,
 } from "../types/twitchAPI";
+import { supabase } from "@/lib/supabase";
 
 export class twitch {
   protected clientID = process.env.TWITCH_CLIENT_ID;
@@ -67,14 +68,15 @@ export class twitch {
   }
 
   async RefreshToken(refreshToken: string, channelID: number) {
-    console.log(refreshToken, channelID);
-
     try {
       const res = await axios.post(
         `https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=refresh_token&refresh_token=${refreshToken}`
       );
 
-      await appwriteAPI.updateTokens(channelID, res.data);
+      await supabase
+        .from("twitch_integration")
+        .update({ access_token: res.data.access_token, refresh_token: res.data.refresh_token })
+        .eq("broadcaster_id", channelID);
 
       return res.data;
     } catch (error) {

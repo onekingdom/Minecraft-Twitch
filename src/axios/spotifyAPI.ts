@@ -64,7 +64,6 @@ SpotifyAPI.interceptors.response.use(
 
       const { access_token } = await spotifyAPI.refresh_token(data.refresh_token);
 
-      console.log("new access token: ", access_token);
 
       //update the headers for the new request
       originalRequest.headers["Authorization"] = "Bearer " + access_token;

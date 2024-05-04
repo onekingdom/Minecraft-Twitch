@@ -33,9 +33,6 @@ class spotify_api {
       if (response.status === 200) {
         const { access_token } = response.data;
 
-        console.log("New access token:", access_token);
-        console.log("New refresh token:", refresh_token);
-
         const { error } = await supabase.from("spotify_integrations").update({ access_token }).eq("refresh_token", refresh_token);
 
         if (error) {

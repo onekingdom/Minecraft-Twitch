@@ -9,8 +9,6 @@ import { handleVariable } from "./handle-variable";
 export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
   const { chatter_user_name, broadcaster_user_name, message, message_id, broadcaster_user_id, chatter_user_id, chatter_user_login } = chatMessage;
 
-  // remove invisible characters
-
   console.log(`[${broadcaster_user_name}] ${chatter_user_name}: ${message.text}`);
 
   // parse the message
@@ -47,6 +45,7 @@ export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
         action: foundCommand.action,
         args,
         broadcaster_id: +broadcaster_user_id,
+        broadcaster_name: broadcaster_user_name,
         chatter_id: chatter_user_id,
         chatter_name: chatter_user_name,
         return_message: messageToSend,

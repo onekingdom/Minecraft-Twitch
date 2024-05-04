@@ -1,3 +1,5 @@
+import handle_banned_song_add from "./actions/spotify/handle_banned_song_add";
+import handle_banned_song_remove from "./actions/spotify/handle_banned_song_remove";
 import handle_song_request from "./actions/spotify/handle_song_request";
 import handleSongVariable from "./actions/spotify/handle_song_variable";
 import checkvariable from "./check-variable";
@@ -6,6 +8,7 @@ interface chat_object {
   action: string;
   args: string[];
   broadcaster_id: number;
+  broadcaster_name: string;
   chatter_id: string;
   chatter_name: string;
   return_message: string;
@@ -14,6 +17,7 @@ export default async function handle_action({
   action,
   args,
   broadcaster_id,
+  broadcaster_name,
   chatter_id,
   chatter_name,
   return_message,
@@ -27,13 +31,19 @@ export default async function handle_action({
     case "spotify":
       switch (_action) {
         case "song_request":
-          const song = await handle_song_request({
-            args,
-            broadcaster_id: broadcaster_id,
-            broadcaster_name: chatter_name,
-            chatter_id: chatter_id.toString(),
-            chatter_name: chatter_name,
-          });
+          let song;
+          try {
+            song = await handle_song_request({
+              args,
+              broadcaster_id: broadcaster_id,
+              broadcaster_name: broadcaster_name,
+              chatter_id: chatter_id.toString(),
+              chatter_name: chatter_name,
+            });
+          } catch (error: any) {
+            console.log(error);
+            return error;
+          }
 
           const varableCheck = checkvariable(return_message);
 
@@ -51,7 +61,38 @@ export default async function handle_action({
 
           return newArray.join(" ");
 
-          break;
+        case "add_banned_song":
+          try {
+            let banned = await handle_banned_song_add({
+              broadcaster_id: broadcaster_id,
+              broadcaster_name: broadcaster_name,
+              chatter_id: chatter_id,
+              chatter_name: chatter_name,
+              song: args.join(" "),
+            });
+            return banned;
+          } catch (error: any) {
+            return error;
+          }
+
+        case "remove_banned_song":
+          try {
+            let remove_ban = await handle_banned_song_remove({
+              broadcaster_id: broadcaster_id,
+              song: args.join(" "),
+              broadcaster_name: broadcaster_name,
+              chatter_id: chatter_id,
+              chatter_name: chatter_name,
+            });
+            return remove_ban;
+          } catch (error: any) {
+            return error;
+          }
+
+        case "add_banned_chatter":
+
+        case "remove_banned_chatter":
+
         default:
           break;
       }
