@@ -15,7 +15,6 @@ socket.addEventListener("message", async (event) => {
 // socket opened
 socket.addEventListener("open", (event) => {
   console.log("Connected to EventSub");
-  // console.log(event.target)
 });
 
 // socket closed
@@ -24,22 +23,22 @@ socket.addEventListener("close", (event) => {
   // console.log(event);
 });
 
-// error handler
+// error handler 
 socket.addEventListener("error", (event) => {
   console.error(event);
 });
 
 const handleWebSocketMessage = async (message: WebSocketMessage) => {
-  // console.log(message);
-
   switch (message.metadata.message_type) {
     case "session_welcome":
       // get the conduct id
       const id = await EventsubAPI.getConducts();
 
+      console.log("Received session welcome message");
+      console.log(message.payload);
+
       if ("session" in message.payload) {
         //  handle condicts
-
         const res = await EventsubAPI.updateConduitShards({
           conduit_id: id.data[0].id,
           shards: [
@@ -52,22 +51,6 @@ const handleWebSocketMessage = async (message: WebSocketMessage) => {
             },
           ],
         });
-
-        if (res.data[0].status === "enabled") {
-        //   const res = await EventsubAPI.createEventSubSubscription({
-        //     type: "channel.chat.message",
-        //     version: "1",
-        //     condition: {
-        //       broadcaster_user_id: "122604941",
-        //       user_id: "122604941",
-        //     },
-        //     transport: {
-        //       method: "conduit",
-        //       conduit_id: id.data[0].id,
-        //     },
-        //   });
-         
-        }
       }
 
       break;
@@ -83,10 +66,33 @@ const handleWebSocketMessage = async (message: WebSocketMessage) => {
       // Handle reconnect message
       console.log("Received session reconnect message");
 
-      if ("session" in message.payload) {
-        // Reconnect to the WebSocket server
-        // socket = createWebSocket(message.payload.session.reconnect_url);
-      }
+      // Extract the new connection URL from the message
+      // @ts-ignore
+      const newConnectionUrl = message.payload.session.reconnect_url;
+
+      // Open a new WebSocket connection to the provided URL
+      const newSocket = new WebSocket(newConnectionUrl);
+
+      // Handle events on the new connection (similar to existing logic)
+      newSocket.addEventListener("message", async (event) => {
+        const newMessage = JSON.parse(event.data.toString());
+        await handleWebSocketMessage(newMessage);
+      });
+
+      newSocket.addEventListener("open", (event) => {
+        console.log("Connected to new EventSub server");
+        // Close the old connection after receiving Welcome message
+        socket.close();
+      });
+
+      newSocket.addEventListener("close", (event) => {
+        console.log("Disconnected from old EventSub server");
+      });
+
+      newSocket.addEventListener("error", (event) => {
+        console.error("Error on new EventSub connection", event);
+      });
+
       break;
     case "revocation":
       // Handle revocation message
@@ -95,9 +101,6 @@ const handleWebSocketMessage = async (message: WebSocketMessage) => {
     default:
       // Handle other message types or unknown types
       console.log("Received unknown message type");
-
-      console.log(message.metadata.message_type);
-
       break;
   }
 };

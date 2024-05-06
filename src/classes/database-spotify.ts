@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { BannedSong, SpotifySettings } from "@/types/database";
+import { BannedChatter, BannedSong, SpotifySettings } from "@/types/database";
 
 class spotify_database {
   // get the spotify settings
@@ -58,6 +58,78 @@ class spotify_database {
       throw error;
     }
   }
+
+  // check if a chatter is banned based of chatter_id
+  async check_chatter_banned(broadcaster_id: string, chatter_id: string): Promise<BannedSong | null> {
+    try {
+      const { data } = await supabase.from("spotify_banned_chatters").select("*").eq("broadcaster_id", broadcaster_id).eq("chatter_id", chatter_id).single();
+
+      return data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  // add a chatter to the banned list
+  async add_banned_chatter(banned_chatter: BannedChatter) {
+    try {
+      const { data, error } = await supabase.from("spotify_banned_chatters").insert([banned_chatter]);
+
+      if(error) {
+        console.log(error);
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  // remove a chatter from the banned list
+  async remove_banned_chatter({ broadcaster_id, chatter_id }: { broadcaster_id: string; chatter_id: string }) {
+    try {
+      const { data } = await supabase.from("spotify_banned_chatters").delete().eq("broadcaster_id", broadcaster_id).eq("chatter_id", chatter_id);
+
+      return data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  // get all banned chatters
+  async get_banned_chatters(broadcaster_id: string) {
+    try {
+      const { data } = await supabase.from("spotify_banned_chatters").select().eq("broadcaster_id", broadcaster_id);
+
+      return data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  // get all banned chatters based on chatter_id
+  async get_banned_chatter(broadcaster_id: string, chatter_id: string) {
+    try {
+      const { data } = await supabase.from("spotify_banned_chatters").select().eq("broadcaster_id", broadcaster_id).eq("chatter_id", chatter_id);
+
+      return data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  
+
+
+
+
+
 }
 
 export const spotifyDB = new spotify_database();

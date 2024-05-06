@@ -43,22 +43,18 @@ class commandDatabase {
 
   // find command
   async findCommand(command: string, channelID: number) {
-    const {data, error, count} = await supabase.from("commands").select("*").eq("command", command).eq("broadcaster_id", channelID)
+    const { data, error, count } = await supabase.from("commands").select("*").eq("command", command).eq("broadcaster_id", channelID);
 
-    
-    if (error) {  
+    if (error) {
       console.log(error);
       return;
     }
 
-    if(count === 0 || data.length === 0) {
-      return
+    if (count === 0 || data.length === 0) {
+      return;
     }
 
-
-    
     return data[0];
-
 
     return;
   }
@@ -77,7 +73,6 @@ class commandDatabase {
       [Permission.read(Role.user(user.userid)), Permission.write(Role.user(user.userid))],
       true
     );
-
 
     if (!res) return;
 
@@ -109,7 +104,14 @@ class commandDatabase {
   }
 
   private async createCommandIndexs(channelID: number) {
-    await database.createIndex(this.databaseID, channelID.toString(), "search", "key", ["command","message", "cooldown", "enabled",], ["asc", "asc", "asc", "asc"]);
+    await database.createIndex(
+      this.databaseID,
+      channelID.toString(),
+      "search",
+      "key",
+      ["command", "message", "cooldown", "enabled"],
+      ["asc", "asc", "asc", "asc"]
+    );
 
     await database.createIndex(this.databaseID, channelID.toString(), "unique", "unique", ["command"], ["asc"]);
   }

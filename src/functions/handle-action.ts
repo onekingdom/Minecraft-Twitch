@@ -1,3 +1,5 @@
+import handle_banned_chatter_add from "./actions/spotify/handle_banned_chatter_add";
+import handle_banned_chatter_remove from "./actions/spotify/handle_banned_chatter_remove";
 import handle_banned_song_add from "./actions/spotify/handle_banned_song_add";
 import handle_banned_song_remove from "./actions/spotify/handle_banned_song_remove";
 import handle_song_request from "./actions/spotify/handle_song_request";
@@ -90,8 +92,34 @@ export default async function handle_action({
           }
 
         case "add_banned_chatter":
+          try {
+            let banned = await handle_banned_chatter_add({
+              args,
+              broadcaster_id: broadcaster_id,
+              broadcaster_name: broadcaster_name,
+              chatter_id: chatter_id,
+              chatter_name: chatter_name,
+            });
+            return banned;
+          } catch (error: any) {
+            console.log(error);
+            return error;
+          }
 
         case "remove_banned_chatter":
+          try {
+            let banned = await handle_banned_chatter_remove({
+              args,
+              broadcaster_id: broadcaster_id,
+              broadcaster_name: broadcaster_name,
+              chatter_id: chatter_id,
+              chatter_name: chatter_name,
+            });
+            return banned;
+          } catch (error: any) {
+            console.log(error);
+            return error;
+          }
 
         default:
           break;

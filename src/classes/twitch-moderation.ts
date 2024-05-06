@@ -7,12 +7,12 @@ class twitch_moderation extends twitch {
     super();
   }
 
-  async getModerators(broadcaster_id: string, userid: string[], first?: string, after?: string): Promise<GetModeratorsResponse> {
+  async getModerators(broadcaster_id: string, userid?: string[], first?: string, after?: string): Promise<GetModeratorsResponse> {
     try {
       const res = await TwitchAPI.get(`/moderation/moderators`, {
         params: {
           broadcaster_id,
-          user_id: userid.join(","),
+          user_id: userid?.join(",") ?? undefined,
           first,
           after,
         },

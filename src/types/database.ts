@@ -6,10 +6,9 @@ export enum UserLevel {
   vip = "vip",
   subscriber = "subscriber",
   moderator = "moderator",
-  supermoderator ="super_moderator",
+  supermoderator = "super_moderator",
   broadcaster = "broadcaster",
 }
-
 
 export interface Command {
   command: string;
@@ -23,16 +22,14 @@ export interface Command {
   created_by: string;
 }
 
-
 export interface SpotifySettings {
-  id: string
-  created_at: Date
-  broadcaster_id: number
-  user_id: string
-  global_queue_limit: number
-  chatter_queue_limit: boolean
+  id: string;
+  created_at: Date;
+  broadcaster_id: number;
+  user_id: string;
+  global_queue_limit: number;
+  chatter_queue_limit: boolean;
 }
-
 
 export interface BannedSong {
   broadcaster_id: number;
@@ -42,6 +39,18 @@ export interface BannedSong {
   artists: string;
   settings_id: string;
   user_id: string;
+}
+
+export interface BannedChatter {
+  broadcaster_id: number;
+  broadcaster_name: string;
+  chatter_id: string;
+  chatter_name: string;
+  moderator_id: string;
+  moderator_name: string;
+  settings_id: string;
+  user_id: string;
+  created_at: Date;
 }
 
 export interface CommandStorage extends Models.Document, Command {}
