@@ -3,8 +3,7 @@ import { EventsubAPI } from "./classes/twitch-eventsub";
 import { HandleEvent } from "./eventsub/handleEvent";
 import { WebSocketMessage } from "./types/eventsub";
 
-// const socket = new WebSocket("wss://eventsub.wss.twitch.tv/ws");
-const socket = new WebSocket("ws://127.0.0.1:8080/ws");
+const socket = new WebSocket(process.env.EVENTSUB_URL!);
 
 
 // message is received
