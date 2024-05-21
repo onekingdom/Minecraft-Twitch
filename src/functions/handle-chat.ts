@@ -49,6 +49,7 @@ export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
         chatter_id: chatter_user_id,
         chatter_name: chatter_user_name,
         return_message: messageToSend,
+        user_id: foundCommand.user_id,
       });
 
       if (responseMessage) messageToSend = responseMessage;
@@ -78,6 +79,8 @@ export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
     );
 
     messageToSend = newArray.join(" ");
+
+    if(messageToSend === "") return;
 
     // send the message
     await twitchChat.sendMessage({

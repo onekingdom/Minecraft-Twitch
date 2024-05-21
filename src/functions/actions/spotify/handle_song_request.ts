@@ -1,9 +1,8 @@
 import { spotifyAPI } from "../../../classes/spotify";
-import { TrackObjectFull } from "../../../types/spotify-web-api";
 import { supabase } from "../../../lib/supabase";
-import { isCheckingCurrentSong, startCheckingCurrentSong, stopCheckingCurrentSong } from "./handle_song_request_queue";
-import get_song_uri from "./get_song_id";
+import { TrackObjectFull } from "../../../types/spotify-web-api";
 import get_song_id from "./get_song_id";
+import { isCheckingCurrentSong, startCheckingCurrentSong } from "./handle_song_request_queue";
 
 interface SpotifySettings {
   broadcaster_id: number;
@@ -17,21 +16,22 @@ export default async function ({ args, broadcaster_id, broadcaster_name, chatter
   const searchQuery = args.join(" ");
   let song_data: TrackObjectFull | undefined;
 
+
+  
+
   // check if the search query is a spotify uri
   const id = get_song_id(searchQuery);
 
-    if (id) {
+  if (id) {
     song_data = await spotifyAPI.get_song_data(id, broadcaster_id);
   } else {
     const search = await spotifyAPI.search_spotify(searchQuery, broadcaster_id);
     song_data = search?.tracks?.items[0];
   }
 
-
-
   // check if the song was found
   if (!song_data) {
-    throw ("Song not found");
+    throw "Song not found";
   }
 
   // get the spotify settings
@@ -39,14 +39,14 @@ export default async function ({ args, broadcaster_id, broadcaster_name, chatter
     .from("spotify_settings")
     .select("*, spotify_banned_chatters(chatter_id), spotify_banned_songs(song_id)")
     .eq("broadcaster_id", broadcaster_id)
-    .lte("spotify_banned_chatters.chatter_id", chatter_id)
+    .eq("spotify_banned_chatters.chatter_id", chatter_id)
     .single();
 
   if (!spotify_settings) {
     throw "Spotify settings not found in the database";
   }
 
-  // check if the chatter is banned3
+  
   if (spotify_settings.spotify_banned_chatters && spotify_settings.spotify_banned_chatters.length > 0) {
     throw "You are banned from requesting songs";
   }
@@ -104,13 +104,8 @@ export default async function ({ args, broadcaster_id, broadcaster_name, chatter
   // add the song to the queue
   const { data: added_song, error } = await supabase.from("spotify_queue").insert([queue_obj]);
 
-  // check if we are updating the queue
-  if (!isCheckingCurrentSong(broadcaster_id)) {
-    startCheckingCurrentSong(broadcaster_id);
-  }
 
-  if (error) {
-    console.log(error);
+  if (error) {    
     throw "Failed to add song to database queue";
   }
 

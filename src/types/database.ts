@@ -1,4 +1,3 @@
-import type { Models } from "node-appwrite";
 
 export enum UserLevel {
   everyone = "everyone",
@@ -53,4 +52,3 @@ export interface BannedChatter {
   created_at: Date;
 }
 
-export interface CommandStorage extends Models.Document, Command {}

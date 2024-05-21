@@ -1,7 +1,6 @@
 import axios from "axios";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
 import { TwitchAPI } from "../axios/twitchAPI";
-import { appwriteAPI } from "./appwrite";
 import type {
   ClipResponse,
   CustomRewardRequest,
@@ -50,22 +49,7 @@ export class twitch {
     }
   }
 
-  async Config(channelID: number) {
-    const tokens = await appwriteAPI.getTokens(channelID);
 
-    if (tokens) {
-      const config: AxiosRequestConfig = {
-        headers: {
-          "Client-ID": process.env.TWITCH_CLIENT_ID,
-          Authorization: `Bearer ${tokens.accessToken}`,
-        },
-        broadcasterID: +channelID,
-      };
-      return config;
-    }
-
-    return;
-  }
 
   async RefreshToken(refreshToken: string, channelID: number) {
     try {

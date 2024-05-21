@@ -1,39 +1,33 @@
-import { Query } from "node-appwrite";
-import { database } from "../lib/appwrite";
-import { Tokens } from "../types/appwrite";
+import { supabase } from "@/lib/supabase";
 
 class integrations_database {
-  protected database_id: string;
+  // Get the user's integrations
+  async get_user_interactions(broadcaster_id: number) {
+    const { error, data: integrations } = await supabase.from("user_integrations").select("*").eq("broadcaster_id", broadcaster_id).single();
 
-  constructor() {
-    this.database_id = "65afdd18a67ce0ea7b96";
-  }
-}
-
-class twitch_user_integration extends integrations_database {
-  private collection_id: string;
-  constructor() {
-    super();
-    this.collection_id = "65afdd31d1222a19ecfc";
-  }
-
-  async getTokens(channelID: number) {
-    try {
-      const Tokens = await database.listDocuments<Tokens>(this.database_id, this.collection_id, [
-        Query.equal("channelID", channelID),
-      ]);
-
-      if (Tokens.documents.length > 0) {
-        return Tokens.documents[0];
-      }
-
-      return undefined;
-    } catch (error) {
-      console.log("error getting tokens");
+    if (error) {
       console.log(error);
+      throw error;
     }
+
+    return integrations;
   }
+
+
+
+  // update the twitch integration
+  async update_twitch_integration(broadcaster_id: string, twitch_integration: any) {
+    const { data, error } = await supabase.from("twitch_integration").update([twitch_integration]).eq("broadcaster_id", broadcaster_id);
+
+    if (error) {
+      console.log(error);
+      throw error;
+    }
+
+    return data;
+  }
+
+
+
 }
-
-
-export const TwitchUsersDatabase = new twitch_user_integration();
+export const database_integrations = new integrations_database();

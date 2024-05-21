@@ -6,17 +6,15 @@
     "@types/bun": "latest"
   },
   "scripts": {
-    "dev": "bun run --hot ./src/app.ts"
+    "dev": "bun run --hot ./src/app.ts",
+    "start": "bun run ./src/app.ts"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.42.7",
-    "@types/spotify-web-api-node": "^5.0.11",
     "axios": "^1.6.8",
-    "i": "^0.3.7",
-    "node-appwrite": "^11.1.1",
-    "npm": "^10.6.0"
+    "proxy-from-env": "^1.1.0"
   }
 }

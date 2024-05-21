@@ -1,3 +1,4 @@
+import { database_integrations } from "@/classes/database-integrations";
 import { spotifyAPI } from "@/classes/spotify";
 import { supabase } from "@/lib/supabase";
 import { TrackObjectFull } from "@/types/spotify-web-api";
@@ -19,7 +20,13 @@ export function startCheckingCurrentSong(broadcaster_id: number): void {
 
   let songID: string = "";
   intervals[broadcaster_id] = setInterval(async () => {
-    let res = await spotifyAPI.get_current_song(broadcaster_id);
+    let res;
+
+    try {
+      res = await spotifyAPI.get_current_song(broadcaster_id);
+    } catch (error) {
+      return;
+    }
 
     if (!res?.item) {
       console.log("No song is currently playing");
@@ -27,7 +34,6 @@ export function startCheckingCurrentSong(broadcaster_id: number): void {
     }
 
     const song = res?.item as TrackObjectFull;
-    
 
     if (!song) {
       console.log("no song found");
@@ -35,30 +41,24 @@ export function startCheckingCurrentSong(broadcaster_id: number): void {
       return;
     }
 
-    const queue = await supabase.from("spotify_queue").select("*").eq("broadcaster_id", broadcaster_id);
-
-    if (!queue.data) {
-      console.log("no queue data found");
-
-      return stopCheckingCurrentSong(broadcaster_id);
-    }
-
-  
-    if (queue.data.length === 0) {
-      //stop the interval
-      console.log("queue is empty stopping interval");
-      return stopCheckingCurrentSong(broadcaster_id);
-    }
-
-
 
     if (song.id === songID) {
       return;
     }
+
     songID = song.id ?? "";
-    console.log("new song playing" + song.name);
+    console.log("new song playing " + song.name);
+    const queue = await supabase.from("spotify_queue").select("*").eq("broadcaster_id", broadcaster_id);
 
+    if (!queue.data) {
+      return;
+    }
 
+    if (queue.data.length === 0) {
+      //stop the interval
+
+      return;
+    }
 
     queue.data?.forEach(async (songs) => {
       if (songs.song_id === song.id) {
@@ -70,6 +70,8 @@ export function startCheckingCurrentSong(broadcaster_id: number): void {
           console.log(error);
           console.log("error removing song from queue");
         }
+
+
       }
     });
   }, 2000) as NodeJS.Timeout; // 5000 milliseconds = 5 seconds

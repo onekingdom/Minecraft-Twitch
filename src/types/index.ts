@@ -1,9 +1,6 @@
 import type { AxiosRequestConfig } from "axios";
 declare module "bun" {
   interface Env {
-    APPWRITE_ENDPOINT: string;
-    APPWRITE_PROJECT_ID: string;
-    APPWRITE_API_KEY: string;
     TWITCH_CLIENT_ID: string;
     TWITCH_CLIENT_SECRET: string;
     TWITCH_APP_TOKEN: string;

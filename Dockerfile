@@ -1,14 +1,20 @@
-FROM node:18.16-alpine
+# use the official Bun image
+# see all versions at https://hub.docker.com/r/oven/bun/tags
+FROM oven/bun:1.0
 
-WORKDIR /usr/src/app
+WORKDIR /home/bun/app
+
+COPY ./package.json .
+
+RUN bun install
+
+COPY . .
 
 
-#Install dependencies
-COPY package*.json ./
-RUN npm install
 
+# run the app
+USER root
 
-# Bundle app source
-COPY ./dist ./
+CMD [ "ls", "-la", "/home/bun/app/node_modules" ]
 
-CMD ["npm", "start"]
+ENTRYPOINT [ "bun", "start" ]

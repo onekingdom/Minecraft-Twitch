@@ -111,6 +111,22 @@ class spotify_api {
       console.log(error.response.data);
     }
   }
+
+
+  async skip_song(channel_id: number) {
+    try {
+      const response = await SpotifyAPI.post("/me/player/next", {}, { broadcasterID: channel_id });
+
+      if (response.status === 204) {
+        return true;
+      } else {
+        throw new Error("Failed to skip song");
+      }
+    } catch (error: any) {
+      console.log("Error skipping song:");
+      console.log(error.response.data);
+    }
+  }
 }
 
 export const spotifyAPI = new spotify_api();
