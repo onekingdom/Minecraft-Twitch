@@ -1,9 +1,9 @@
 import { supabase } from "@/lib/supabase";
-import { BannedChatter, BannedSong, SpotifySettings } from "@/types/database";
+import { InserSpotifyBannedChatterTable, InsertSpotifyBannedSongsTable, SpotifyBannedChatterTable, SpotifyBannedSongsTable, SpotifySettingsTable, UpdateSpotifyBannedChatterTable } from "@/types/database";
 
 class spotify_database {
   // get the spotify settings
-  async get_spotify_settings(broadcaster_id: string): Promise<SpotifySettings> {
+  async get_spotify_settings(broadcaster_id: string): Promise<SpotifySettingsTable | null> {
     try {
       const { data } = await supabase.from("spotify_settings").select("*").eq("broadcaster_id", broadcaster_id).single();
 
@@ -14,7 +14,7 @@ class spotify_database {
     }
   }
 
-  async add_banned_song(banned_song: BannedSong) {
+  async add_banned_song(banned_song: InsertSpotifyBannedSongsTable) {
     try {
       const { data } = await supabase.from("spotify_banned_songs").insert([banned_song]);
 
@@ -48,7 +48,7 @@ class spotify_database {
   }
 
   // check if a song is baned based of song_id
-  async check_song_banned(broadcaster_id: string, song_id: string): Promise<BannedSong | null> {
+  async check_song_banned(broadcaster_id: string, song_id: string): Promise<SpotifyBannedSongsTable | null> {
     try {
       const { data } = await supabase.from("spotify_banned_songs").select("*").eq("broadcaster_id", broadcaster_id).eq("song_id", song_id).single();
 
@@ -60,7 +60,7 @@ class spotify_database {
   }
 
   // check if a chatter is banned based of chatter_id
-  async check_chatter_banned(broadcaster_id: string, chatter_id: string): Promise<BannedSong | null> {
+  async check_chatter_banned(broadcaster_id: string, chatter_id: string): Promise<SpotifyBannedChatterTable | null> {
     try {
       const { data } = await supabase.from("spotify_banned_chatters").select("*").eq("broadcaster_id", broadcaster_id).eq("chatter_id", chatter_id).single();
 
@@ -72,9 +72,9 @@ class spotify_database {
   }
 
   // add a chatter to the banned list
-  async add_banned_chatter(banned_chatter: BannedChatter) {
+  async add_banned_chatter(banned_chatter: InserSpotifyBannedChatterTable) {
     try {
-      const { data, error } = await supabase.from("spotify_banned_chatters").insert([banned_chatter]);
+      const { data, error } = await supabase.from("spotify_banned_chatters").insert(banned_chatter)
 
       if(error) {
         console.log(error);

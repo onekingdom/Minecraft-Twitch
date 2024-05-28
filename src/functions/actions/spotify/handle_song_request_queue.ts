@@ -9,7 +9,7 @@ interface IntervalMap {
 
 const intervals: IntervalMap = {};
 
-export function startCheckingCurrentSong(broadcaster_id: number): void {
+export function startCheckingCurrentSong(broadcaster_id: number, user_id: string): void {
   // Check if the interval is already running for the given broadcaster_id
   if (intervals[broadcaster_id]) {
     console.log(`Interval is already running for channel ${broadcaster_id}`);
@@ -23,7 +23,7 @@ export function startCheckingCurrentSong(broadcaster_id: number): void {
     let res;
 
     try {
-      res = await spotifyAPI.get_current_song(broadcaster_id);
+      res = await spotifyAPI.get_current_song(user_id);
     } catch (error) {
       return;
     }

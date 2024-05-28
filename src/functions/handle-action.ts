@@ -38,7 +38,7 @@ export default async function handle_action({
   switch (catagory) {
     case "spotify":
       // check for spotify integration
-      const spotify_integration = await database_integrations.get_user_interactions(broadcaster_id);
+      const spotify_integration = await database_integrations.get_user_interactions(user_id);
 
       
 
@@ -62,6 +62,7 @@ export default async function handle_action({
               broadcaster_name: broadcaster_name,
               chatter_id: chatter_id.toString(),
               chatter_name: chatter_name,
+              user_id: user_id,
             });
           } catch (error: any) {
             console.log(error);
@@ -95,6 +96,7 @@ export default async function handle_action({
               chatter_id: chatter_id,
               chatter_name: chatter_name,
               song: args.join(" "),
+              user_id: user_id,
             });
             return banned;
           } catch (error: any) {
@@ -110,6 +112,7 @@ export default async function handle_action({
               broadcaster_name: broadcaster_name,
               chatter_id: chatter_id,
               chatter_name: chatter_name,
+              user_id: user_id,
             });
             return remove_ban;
           } catch (error: any) {
@@ -149,7 +152,7 @@ export default async function handle_action({
           }
         case "skip":
           try {
-            await spotifyAPI.skip_song(broadcaster_id);
+            await spotifyAPI.skip_song(user_id);
             return "Song skipped";
           } catch (error: any) {
             console.log(error);

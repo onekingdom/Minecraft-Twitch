@@ -15,7 +15,7 @@ class channelpointsDatabase {
       return;
     }
 
-    if (count === 0 || data.length === 0) {
+    if (count === 0) {
       return;
     }
 

@@ -14,14 +14,14 @@ export const SpotifyAPI = axios.create({
 //spotify request interceptor
 SpotifyAPI.interceptors.request.use(
   async (request) => {
-    if (request.broadcasterID === undefined) {
-      throw new Error("broadcasterID is missing");
+    if (request.user_id === undefined) {
+      throw new Error("User ID is missing");
     }
 
     const { data, error } = await supabase
       .from("spotify_integrations")
       .select("access_token")
-      .eq("twitch_channel_id", request.broadcasterID)
+      .eq("user_id", request.user_id)
       .single();
 
     if (error) {
@@ -53,9 +53,14 @@ SpotifyAPI.interceptors.response.use(
       originalRequest._retry = true;
 
       //get the channel from the request
-      const channel_id = response_error.response?.config.broadcasterID;
+      const user_id = response_error.response?.config.user_id;
 
-      const { data, error } = await supabase.from("spotify_integrations").select("refresh_token").eq("twitch_channel_id", channel_id).single();
+      if(!user_id) {
+        console.log("User ID not found");
+        return Promise.reject("User ID not found");
+      }
+
+      const { data, error } = await supabase.from("spotify_integrations").select("refresh_token").eq("user_id", user_id).single();
 
       if (!data || error) {
         console.log("Error refreshing token");

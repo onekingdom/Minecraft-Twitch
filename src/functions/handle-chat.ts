@@ -32,6 +32,7 @@ export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
       broadcaster_id: +broadcaster_user_id,
       userlevel: foundCommand.userlevel,
       chatter_id: +chatter_user_id,
+      user_id: foundCommand.user_id,
     });
 
     // if the user does not have permission to use the command

@@ -1,5 +1,4 @@
 import axios from "axios";
-import type { AxiosRequestConfig } from "axios";
 import twitchAPI from "../classes/twitch";
 import { supabase } from "@/lib/supabase";
 
@@ -14,10 +13,12 @@ const TwitchAPI = axios.create({
 TwitchAPI.interceptors.request.use(
   async (config) => {
     // Assuming you have a method to get the current token...]
+    const user_id = config.user_id;
+    if (!user_id) {
+      throw new Error("User ID is missing");
+    }
 
-    console.log("TwitchAPI.interceptors.request.use")
-
-    const {data} = await supabase.from("twitch_integration").select("*").eq("broadcaster_id", config.broadcasterID?.toString()).single();
+    const {data} = await supabase.from("twitch_integration").select("*").eq("user_id", user_id).single();
     if (data?.access_token) {
 
       config.headers["Authorization"] = `Bearer ${data.access_token}`;

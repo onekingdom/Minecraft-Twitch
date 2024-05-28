@@ -1,8 +1,10 @@
+import { InstertSpotifyQueueTable } from "@/types/database";
 import { spotifyAPI } from "../../../classes/spotify";
 import { supabase } from "../../../lib/supabase";
 import { TrackObjectFull } from "../../../types/spotify-web-api";
 import get_song_id from "./get_song_id";
 import { isCheckingCurrentSong, startCheckingCurrentSong } from "./handle_song_request_queue";
+import { database_integrations } from "@/classes/database-integrations";
 
 interface SpotifySettings {
   broadcaster_id: number;
@@ -10,22 +12,27 @@ interface SpotifySettings {
   chatter_id: string;
   chatter_name: string;
   args: string[];
+  user_id: string;
 }
 
-export default async function ({ args, broadcaster_id, broadcaster_name, chatter_id, chatter_name }: SpotifySettings): Promise<TrackObjectFull> {
+export default async function ({
+  args,
+  broadcaster_id,
+  broadcaster_name,
+  chatter_id,
+  chatter_name,
+  user_id,
+}: SpotifySettings): Promise<TrackObjectFull> {
   const searchQuery = args.join(" ");
   let song_data: TrackObjectFull | undefined;
-
-
-  
 
   // check if the search query is a spotify uri
   const id = get_song_id(searchQuery);
 
   if (id) {
-    song_data = await spotifyAPI.get_song_data(id, broadcaster_id);
+    song_data = await spotifyAPI.get_song_data(id, user_id);
   } else {
-    const search = await spotifyAPI.search_spotify(searchQuery, broadcaster_id);
+    const search = await spotifyAPI.search_spotify(searchQuery, user_id);
     song_data = search?.tracks?.items[0];
   }
 
@@ -38,7 +45,7 @@ export default async function ({ args, broadcaster_id, broadcaster_name, chatter
   const { data: spotify_settings } = await supabase
     .from("spotify_settings")
     .select("*, spotify_banned_chatters(chatter_id), spotify_banned_songs(song_id)")
-    .eq("broadcaster_id", broadcaster_id)
+    .eq("user_id", user_id)
     .eq("spotify_banned_chatters.chatter_id", chatter_id)
     .single();
 
@@ -46,9 +53,17 @@ export default async function ({ args, broadcaster_id, broadcaster_name, chatter
     throw "Spotify settings not found in the database";
   }
 
-  
   if (spotify_settings.spotify_banned_chatters && spotify_settings.spotify_banned_chatters.length > 0) {
     throw "You are banned from requesting songs";
+  }
+
+  // check if live only is enabled
+  if (spotify_settings.live_only) {
+    const is_live = (await database_integrations.get_twitch_integration(user_id)).is_live;
+
+    if (!is_live) {
+      throw "This feature is only available while the broadcaster is live";
+    }
   }
 
   //check if the song is banned
@@ -61,7 +76,7 @@ export default async function ({ args, broadcaster_id, broadcaster_name, chatter
   }
 
   // check if the song is already in the queue
-  const { data: queue } = await supabase.from("spotify_queue").select("song_id, chatter_id").eq("broadcaster_id", broadcaster_id.toString());
+  const { data: queue } = await supabase.from("spotify_queue").select("song_id, chatter_id").eq("user_id", user_id);
 
   // check if the song is already in the queue
   if (queue && queue.length > 0) {
@@ -85,27 +100,27 @@ export default async function ({ args, broadcaster_id, broadcaster_name, chatter
     }
   }
 
-  const queue_obj = {
+  const queue_obj: InstertSpotifyQueueTable = {
     song_name: song_data.name,
     song_id: song_data.id,
     artists: song_data.artists.map((artist) => artist.name).join(", "),
     chatter_id: chatter_id,
     chatter_name: chatter_name,
-    broadcaster_id: broadcaster_id,
+    broadcaster_id: broadcaster_id.toString(),
     broadcaster_name: broadcaster_name,
+    user_id: spotify_settings.user_id,
   };
 
-  const added = await spotifyAPI.add_song_to_queue(song_data.uri, broadcaster_id);
+  const added = await spotifyAPI.add_song_to_queue(song_data.uri, user_id);
 
   if (!added) {
     throw "Failed to add song to spotify queue";
   }
 
   // add the song to the queue
-  const { data: added_song, error } = await supabase.from("spotify_queue").insert([queue_obj]);
+  const { data: added_song, error } = await supabase.from("spotify_queue").insert(queue_obj);
 
-
-  if (error) {    
+  if (error) {
     throw "Failed to add song to database queue";
   }
 

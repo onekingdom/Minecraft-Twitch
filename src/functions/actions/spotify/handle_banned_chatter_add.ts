@@ -71,11 +71,11 @@ export default async function handle_banned_chatter_add({
 
   // add the chatter to the banned list
   await spotifyDB.add_banned_chatter({
-    broadcaster_id: broadcaster_id,
+    broadcaster_id: broadcaster_id.toString(),
     chatter_id: banned_chatter.id,
     chatter_name: banned_chatter.login,
     broadcaster_name: broadcaster_name,
-    created_at: new Date(),
+    created_at: new Date().toISOString(),
     moderator_id: chatter_id,
     moderator_name: chatter_name,
     settings_id: spotify_settings.id,

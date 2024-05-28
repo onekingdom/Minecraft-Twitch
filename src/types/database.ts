@@ -1,54 +1,32 @@
+import type { Database } from "./supabase";
 
-export enum UserLevel {
-  everyone = "everyone",
-  follower = "follower",
-  vip = "vip",
-  subscriber = "subscriber",
-  moderator = "moderator",
-  supermoderator = "super_moderator",
-  broadcaster = "broadcaster",
-}
 
-export interface Command {
-  command: string;
-  message: string;
-  cooldown: number;
-  enabled: boolean;
-  channelID: number;
-  userlevel: UserLevel;
-  action: string | null;
-  description: string;
-  created_by: string;
-}
+export type PublicSchema = Database['public']['Tables']
+// TABLES
+export type CommandTable = PublicSchema['commands']['Row']
+export type SpotifyBannedChatterTable = PublicSchema['spotify_banned_chatters']['Row']
+export type SpotifySettingsTable = PublicSchema['spotify_settings']['Row']
+export type SpotifyBannedSongsTable = PublicSchema['spotify_banned_songs']['Row']
+export type TwitchIntegrationTable = PublicSchema['twitch_integration']['Row']
 
-export interface SpotifySettings {
-  id: string;
-  created_at: Date;
-  broadcaster_id: number;
-  user_id: string;
-  global_queue_limit: number;
-  chatter_queue_limit: boolean;
-}
 
-export interface BannedSong {
-  broadcaster_id: number;
-  broadcaster_name: string;
-  song_id: string;
-  song_name: string;
-  artists: string;
-  settings_id: string;
-  user_id: string;
-}
+// UPDATE TABELS
+export type UpdateSpotifySettingsTable = PublicSchema['spotify_settings']['Update']
+export type UpdateSpotifyBannedSongsTable = PublicSchema['spotify_banned_songs']['Update']
+export type UpdateSpotifyBannedChatterTable = PublicSchema['spotify_banned_chatters']['Update']
+export type UpdateTwitchIntegrationTable = PublicSchema['twitch_integration']['Update']
 
-export interface BannedChatter {
-  broadcaster_id: number;
-  broadcaster_name: string;
-  chatter_id: string;
-  chatter_name: string;
-  moderator_id: string;
-  moderator_name: string;
-  settings_id: string;
-  user_id: string;
-  created_at: Date;
-}
 
+
+// INSERT TABLES
+export type InsertCommandTable = PublicSchema['commands']['Insert']
+export type InsertSpotifySettingsTable = PublicSchema['spotify_settings']['Insert']
+export type InsertSpotifyBannedSongsTable = PublicSchema['spotify_banned_songs']['Insert']
+export type InserSpotifyBannedChatterTable = PublicSchema['spotify_banned_chatters']['Insert']
+export type InstertSpotifyQueueTable = PublicSchema['spotify_queue']['Insert']
+export type InsertTwitchIntegrationTable = PublicSchema['twitch_integration']['Insert']
+
+
+
+// enums
+export type UserLevel = Database["public"]["Enums"]["userlevel"]

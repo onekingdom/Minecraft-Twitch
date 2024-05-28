@@ -1,8 +1,7 @@
 import { spotifyAPI } from "@/classes/spotify";
-import twitchAPI from "../classes/twitch";
-import { TwitchChannel } from "../classes/twitch-channel";
-import { TrackObjectFull } from "@/types/spotify-web-api";
 import { supabase } from "@/lib/supabase";
+import { TrackObjectFull } from "@/types/spotify-web-api";
+import { TwitchChannel } from "../classes/twitch-channel";
 const variableRegex = /\${(.*?)}/g;
 
 interface Props {

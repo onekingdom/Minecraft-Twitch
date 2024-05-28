@@ -1,23 +1,25 @@
+import { UserLevel } from "@/types/database";
 import { TwitchChannel } from "../classes/twitch-channel";
 import { TwitchModeration } from "../classes/twitch-moderation";
-import { UserLevel } from "../types/database";
 
 export default async function checkCommandPermission({
   broadcaster_id,
   userlevel,
   chatter_id,
+  user_id
 }: {
   broadcaster_id: number;
   userlevel: UserLevel;
   chatter_id: number;
+  user_id: string;
 }): Promise<boolean> {
   if (broadcaster_id === chatter_id) return true;
 
   switch (userlevel) {
-    case UserLevel.everyone:
+    case "everyone":
       return true;
-    case UserLevel.follower:
-      const follower = await TwitchChannel.getFollowers(broadcaster_id.toString(), chatter_id.toString());
+    case "follower":
+      const follower = await TwitchChannel.getFollowers(broadcaster_id.toString(), chatter_id.toString(), user_id);
 
       if (follower.data.length > 0) {
         return true;
@@ -25,16 +27,16 @@ export default async function checkCommandPermission({
 
       return false;
 
-    case UserLevel.vip:
-      const vip = await TwitchChannel.getVip(broadcaster_id.toString(), chatter_id.toString());
+    case "vip":
+      const vip = await TwitchChannel.getVip(broadcaster_id.toString(), chatter_id.toString(), user_id);
 
       if (vip.data.length > 0) {
         return true;
       }
       return false;
-    case UserLevel.subscriber:
+    case "subscriber":
       return false;
-    case UserLevel.moderator:
+    case "moderator":
       const moderator = await TwitchModeration.getModerators(broadcaster_id.toString(), [chatter_id.toString()]);
 
       if (moderator.data.length > 0) {
@@ -42,9 +44,9 @@ export default async function checkCommandPermission({
       }
 
       return false;
-    case UserLevel.supermoderator:
+    case "super_moderator":
       return false;
-    case UserLevel.broadcaster:
+    case "broadcaster":
       return false;
   }
 }

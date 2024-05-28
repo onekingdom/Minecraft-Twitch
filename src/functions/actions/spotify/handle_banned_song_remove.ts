@@ -8,9 +8,10 @@ interface BannedSong {
   broadcaster_name: string;
   chatter_id: string;
   chatter_name: string;
+  user_id: string;
 }
 
-export default async function handle_banned_song_remove({broadcaster_id, broadcaster_name, chatter_id, chatter_name, song}: BannedSong) {
+export default async function handle_banned_song_remove({broadcaster_id, broadcaster_name, chatter_id, chatter_name, song, user_id}: BannedSong) {
   // check if song is a spotify uri
   const id = get_song_id(song);
 
@@ -21,7 +22,7 @@ export default async function handle_banned_song_remove({broadcaster_id, broadca
   // check if the song is banned
   const is_banned = await spotifyDB.check_song_banned(broadcaster_id.toString(), id);
 
-  const song_data = await spotifyAPI.get_song_data(id, broadcaster_id);
+  const song_data = await spotifyAPI.get_song_data(id, user_id);
 
   if (!song_data) {
     throw "Song not found";

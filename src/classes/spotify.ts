@@ -51,9 +51,9 @@ class spotify_api {
   }
 
   // search spotify
-  async search_spotify(query: string, channel_id: number) {
+  async search_spotify(query: string, user_id: string) {
     try {
-      const response = await SpotifyAPI.get<SearchResponse>(`/search?q=${query}&type=track&limit=1`, { broadcasterID: channel_id });
+      const response = await SpotifyAPI.get<SearchResponse>(`/search?q=${query}&type=track&limit=1`, { user_id: user_id });
 
       if (response.status === 200) {
         return response.data;
@@ -62,14 +62,14 @@ class spotify_api {
       }
     } catch (error: any) {
       console.log("Error searching Spotify:");
-      console.log(error.response.data);
+      console.log(error);
     }
   }
 
   // get song data based of uri
-  async get_song_data(uri: string, channel_id: number) {
+  async get_song_data(uri: string, user_id: string) {
     try {
-      const response = await SpotifyAPI.get<TrackObjectFull>(`/tracks/${uri}`, { broadcasterID: channel_id });
+      const response = await SpotifyAPI.get<TrackObjectFull>(`/tracks/${uri}`, { user_id: user_id });
 
       if (response.status === 200) {
         return response.data;
@@ -83,9 +83,9 @@ class spotify_api {
   }
 
   // add song to queue
-  async add_song_to_queue<UsersQueueResponse>(uri: string, channel_id: number) {
+  async add_song_to_queue<UsersQueueResponse>(uri: string, user_id: string) {
     try {
-      const response = await SpotifyAPI.post(`/me/player/queue?uri=${uri}`, {}, { broadcasterID: channel_id });
+      const response = await SpotifyAPI.post(`/me/player/queue?uri=${uri}`, {}, { user_id: user_id });
 
       if (response.status === 204) {
         return true;
@@ -97,9 +97,9 @@ class spotify_api {
     }
   }
 
-  async get_current_song(channel_id: number) {
+  async get_current_song(user_id: string) {
     try {
-      const response = await SpotifyAPI.get<CurrentlyPlayingObject>("/me/player/currently-playing", { broadcasterID: channel_id });
+      const response = await SpotifyAPI.get<CurrentlyPlayingObject>("/me/player/currently-playing", { user_id: user_id });
 
       if (response.status === 200) {
         return response.data;
@@ -113,9 +113,9 @@ class spotify_api {
   }
 
 
-  async skip_song(channel_id: number) {
+  async skip_song(user_id: string) {
     try {
-      const response = await SpotifyAPI.post("/me/player/next", {}, { broadcasterID: channel_id });
+      const response = await SpotifyAPI.post("/me/player/next", {}, { user_id: user_id });
 
       if (response.status === 204) {
         return true;
