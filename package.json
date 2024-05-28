@@ -13,6 +13,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@sentry/bun": "^8.5.0",
     "@supabase/supabase-js": "^2.42.7",
     "axios": "^1.6.8",
     "proxy-from-env": "^1.1.0"
