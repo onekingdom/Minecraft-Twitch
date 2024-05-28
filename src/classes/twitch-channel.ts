@@ -43,7 +43,7 @@ class twitchChannel extends twitch {
   }
 
   // get channel subscribers
-  async getSubsribers(broadcaster_id: string, chatter_id: string, user_id: string, first?: string, after?: string) {
+  async getSubsribers(broadcaster_id: string, user_id: string, chatter_id?: string, first?: string, after?: string) {
     try {
       const res = await TwitchAPI.get<getChannelSubscriptionsReponse>(`/subscriptions`, {
         params: {

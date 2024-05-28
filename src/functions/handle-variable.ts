@@ -10,9 +10,10 @@ interface Props {
   channelID: number;
   chatter_name: string;
   chatter_id: string;
+  user_id: string;
 }
 
-export async function handleVariable({ channel, channelID, chatter_name, chatter_id, varable }: Props) {
+export async function handleVariable({ channel, channelID, chatter_name, chatter_id, varable, user_id }: Props) {
   const intergartion = varable.replace(variableRegex, "$1").split(".");
 
   let catagory = intergartion[0];
@@ -34,13 +35,13 @@ export async function handleVariable({ channel, channelID, chatter_name, chatter
         case "id":
           return channelID;
         case "subscribers":
-          const subsribers = await TwitchChannel.getSubsribers(channelID.toString());
+          const subsribers = await TwitchChannel.getSubsribers(channelID.toString(), user_id);
 
           return subsribers.total;
       }
 
     case "spotify":
-      const now_playing = await spotifyAPI.get_current_song(channelID);
+      const now_playing = await spotifyAPI.get_current_song(user_id);
       const song_data = now_playing?.item as TrackObjectFull;
       const queue = await supabase.from("spotify_queue").select("*").eq("broadcaster_id", channelID);
 

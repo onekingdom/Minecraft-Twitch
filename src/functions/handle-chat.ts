@@ -70,6 +70,7 @@ export async function HandleChatMessage(chatMessage: ChatMessageEvent) {
             channelID: +broadcaster_user_id,
             chatter_id: chatter_user_id,
             chatter_name: chatter_user_name,
+            user_id: foundCommand.user_id,
           });
 
           return variable;
